@@ -1,0 +1,1361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050813">
+<title>DNA Detective: Crime Scene Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050813;--panel:#10162b;--raised:#1a2240;--cyan:#00e5ff;--violet:#9d5cff;--green:#45f5a1;--red:#ff7182;--gold:#ffd24a;--blue:#4aa8ff;--muted:#a9b8d4;--line:#2c3a5e;--safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:#02040a}
+body{margin:0;color:#f4f8ff;font-family:Nunito,system-ui,sans-serif;font-size:calc(16px*var(--scale,1));overflow-x:hidden}
+button{cursor:pointer;font-family:inherit}button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--cyan)!important;outline-offset:2px}
+.app{position:relative;width:min(480px,100%);min-height:100dvh;margin:auto;background:radial-gradient(ellipse at 50% -10%,#1b2d5c,transparent 55%),radial-gradient(ellipse at 110% 90%,#2b1650,transparent 45%),var(--bg);box-shadow:0 0 0 1px #1a2342,0 0 80px #00e5ff14;overflow:hidden}
+.app:before{content:"";position:absolute;inset:0;background-image:radial-gradient(#fff3 1px,transparent 1.5px),radial-gradient(#00e5ff33 1px,transparent 1.5px);background-size:90px 90px,53px 53px;background-position:0 0,20px 30px;opacity:.35;pointer-events:none}
+.view{display:none;position:relative;min-height:100dvh;padding:calc(18px + var(--safe-t)) 16px calc(96px + var(--safe-b))}
+.view.active{display:block;animation:enter .3s ease both}
+@keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+h1,h2,h3,.title{font-family:Fredoka,Nunito,sans-serif;letter-spacing:.01em;margin:0 0 8px;line-height:1.1}
+p{margin:0 0 10px}.muted{color:var(--muted)}.mono,.sequence,.tile,.chip{font-family:"Space Mono",monospace}
+.eyebrow{font-family:"Space Mono",monospace;font-size:11px;color:var(--cyan);letter-spacing:.12em}
+.mt-2{margin-top:8px}.mt-5{margin-top:18px}.mt-7{margin-top:26px}.block{display:block}.justify-center{justify-content:center}
+.panel{background:linear-gradient(150deg,#1a2240,#10162b);border:1px solid var(--line);border-radius:22px;box-shadow:0 12px 36px #0006}
+.btn{min-height:48px;border:2px solid #3a4d78;border-bottom-width:4px;background:var(--raised);color:#f4f8ff;border-radius:16px;padding:10px 16px;font-weight:800;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s,border-color .15s}
+.btn:active:not(:disabled){transform:translateY(3px);border-bottom-width:1px}
+.btn-primary{background:linear-gradient(180deg,#38f0ff,#00bcd4);color:#031420;border-color:#0097a7;box-shadow:0 0 24px #00e5ff55;font-family:Fredoka,sans-serif;font-size:18px;letter-spacing:.03em}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid var(--line);background:#0b1124;border-radius:99px;color:#dbe6fa;font-size:11px}
+.statline,.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.progress{height:10px;border-radius:20px;background:#27314f;overflow:hidden;border:1px solid #0006}
+.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:0 0 12px var(--cyan);transition:width .5s}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:10px;font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.06em}
+.mark{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#00e5ff33,#9d5cff33);border:1px solid #00e5ff88;color:var(--cyan);font-size:22px}
+/* helix */
+.helix{position:relative;width:180px;height:230px;margin:auto;filter:drop-shadow(0 0 10px #00e5ff88)}
+.rung{position:absolute;left:0;right:0;top:calc(var(--i)*19px);height:12px}
+.rung i{position:absolute;top:0;width:12px;height:12px;border-radius:50%;left:84px;animation:orb 3.6s ease-in-out infinite;animation-delay:calc(var(--i)*-.3s)}
+.rung i:nth-child(1){background:var(--violet);box-shadow:0 0 10px var(--violet)}
+.rung i:nth-child(2){background:var(--cyan);box-shadow:0 0 10px var(--cyan);animation-direction:reverse}
+.rung b{position:absolute;left:10px;right:10px;top:5px;height:2px;background:linear-gradient(90deg,var(--violet),var(--cyan));opacity:.7;animation:bar 3.6s ease-in-out infinite;animation-delay:calc(var(--i)*-.3s)}
+@keyframes orb{0%,100%{transform:translateX(-72px)}50%{transform:translateX(72px)}}
+@keyframes bar{0%,100%{transform:scaleX(1)}25%{transform:scaleX(0)}50%{transform:scaleX(1)}75%{transform:scaleX(0)}}
+/* home */
+.hero{text-align:center;padding:10px 0 4px}
+.hero .title{font-size:clamp(44px,14vw,64px);margin:6px 0;background:linear-gradient(180deg,#fff,#7defff 60%,#b48cff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 40px #00e5ff44}
+.menu-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.menu-actions .wide{grid-column:1/-1}
+.hud-mini{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:14px 0}
+/* tab bar */
+.tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);display:flex;background:#0a1022f2;backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 6px calc(6px + var(--safe-b));z-index:20}
+body.ingame .tabbar{display:none}
+.tab{flex:1;background:none;border:0;color:#7c8cb0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:800;padding:6px 0;border-radius:14px}
+.tab span{font-size:22px;filter:grayscale(1) opacity(.7)}
+.tab.on{color:var(--cyan);background:#00e5ff14}.tab.on span{filter:none;transform:translateY(-2px)}
+/* hub */
+.profile-card{padding:16px;display:flex;gap:14px;align-items:center;margin-bottom:18px}
+.avatar{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;font-size:30px;background:linear-gradient(135deg,var(--violet),var(--cyan));box-shadow:0 0 22px #00e5ff55;flex:none}
+.profile-card>div:last-child{flex:1;min-width:0}
+.path{position:relative;display:flex;flex-direction:column;gap:16px;padding-left:0}
+.mission{position:relative;padding:16px;display:grid;grid-template-columns:58px 1fr;gap:6px 14px;border-radius:22px}
+.mission.locked{filter:saturate(.3);opacity:.7}.mission.done{border-color:#45f5a188}
+.node{grid-row:1/4;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:26px;background:radial-gradient(circle at 30% 25%,#2a3a70,#101733);border:3px solid var(--cyan);box-shadow:0 0 18px #00e5ff55;font-family:Fredoka}
+.mission.locked .node{border-color:#47536f;box-shadow:none}.mission.done .node{border-color:var(--green);box-shadow:0 0 18px #45f5a155}
+.mission h3{font-size:20px;margin:0}.mission p{font-size:13px;color:var(--muted);margin:0}
+.mission-meta{display:flex;gap:6px;flex-wrap:wrap}.mission .btn{grid-column:1/-1;width:100%;margin-top:6px}.mission small{grid-column:1/-1;font-size:12px}
+.d0{color:var(--green)}.d1{color:var(--gold)}.d2{color:#ff9d4a}.d3{color:var(--violet)}.d4{color:var(--red)}
+/* game */
+.hud{padding:12px 14px;margin-bottom:12px;position:sticky;top:calc(6px + var(--safe-t));z-index:10;background:linear-gradient(150deg,#1a2240f5,#10162bf5)}
+.hud-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hud .btn{min-height:40px;padding:6px 12px;font-size:13px}
+.evidence,.case{padding:18px;margin-bottom:12px;min-width:0}
+.sequence{letter-spacing:.05em;overflow-wrap:anywhere;color:var(--cyan);font-size:15px;line-height:1.7;background:#050b1a;border:1px solid #1f5368;border-radius:14px;padding:14px;margin:12px 0;white-space:pre-line;box-shadow:inset 0 0 22px #00e5ff14}
+.note{border-left:3px solid var(--cyan);padding:10px 13px;background:#00e5ff0d;border-radius:0 12px 12px 0;line-height:1.5;font-size:14px}
+.evidence-grid{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;margin:8px 0;scroll-snap-type:x mandatory}
+.evidence-card{flex:0 0 72%;scroll-snap-align:start;padding:12px;border:1px solid #3a5272;border-radius:14px;background:#0f1d33}
+.evidence-card.marked{border-color:var(--gold);box-shadow:0 0 14px #ffd24a33}
+.evidence-card h3{font-size:15px}.evidence-card p{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.evidence-card .btn{min-height:36px;padding:5px 10px;font-size:12px;margin:2px 4px 0 0}
+.puzzle-grid{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;justify-content:center}
+.tile{min-width:46px;min-height:50px;padding:6px;border:2px solid #4c6288;border-bottom-width:4px;border-radius:12px;background:#0f1a30;color:#f4f8ff;font-size:19px;font-weight:700;transition:transform .12s}
+.tile:active:not(:disabled){transform:translateY(2px)}
+.tile[data-b=A]{color:var(--green);border-color:#45f5a188}.tile[data-b=T],.tile[data-b=U]{color:var(--red);border-color:#ff718288}
+.tile[data-b=G]{color:var(--gold);border-color:#ffd24a88}.tile[data-b=C]{color:var(--blue);border-color:#4aa8ff88}.tile[data-b=U]{color:#c28bff;border-color:#c28bff88}
+.tile.selected,.choice.selected{background:#00e5ff2e;box-shadow:0 0 16px #00e5ff66;transform:translateY(-3px)}
+.tile.fixed{background:#0a1224;border-style:dashed}
+.ladder-row{display:flex;align-items:center;flex-direction:column;gap:2px}.ladder-line{height:14px;width:3px;background:linear-gradient(var(--violet),var(--cyan));border-radius:2px}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0}.choice{text-align:left;justify-content:flex-start;overflow-wrap:anywhere}
+.label{display:block;color:var(--muted);font-size:13px;font-weight:700;margin:14px 0 6px}
+.feedback{min-height:42px;color:var(--muted);margin:12px 0;font-weight:700}.feedback.good{color:var(--green)}.feedback.bad{color:var(--red)}
+.case.shake{animation:shake .4s}.case.win{border-color:var(--green);box-shadow:0 0 34px #45f5a155}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.gamebar{position:sticky;bottom:calc(8px + var(--safe-b));z-index:9;padding:10px;display:flex;gap:8px;background:#0a1022f2;border:1px solid var(--line);border-radius:20px;backdrop-filter:blur(10px)}
+.gamebar .btn{flex:1}.gamebar .btn[hidden]{display:none}
+/* overlay */
+.overlay{position:fixed;inset:0;z-index:40;background:#03060fe6;display:none;align-items:center;justify-content:center;padding:18px}.overlay.open{display:flex}
+.dialog{width:min(420px,100%);max-height:88%;overflow:auto;padding:26px;text-align:center;animation:pop .25s}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+.dialog .actions{flex-direction:column}.dialog .btn{width:100%}
+.setting-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #2a3858}
+.badge{padding:11px;border:1px solid #45f5a166;border-radius:12px;background:#45f5a110;margin:8px 0;font-weight:800}
+.cf{position:fixed;top:55%;width:9px;height:13px;z-index:60;pointer-events:none;animation:cf 1.3s ease-out forwards}
+@keyframes cf{30%{transform:translate(calc(var(--x)*.6),-130px) rotate(var(--r))}to{transform:translate(var(--x),280px) rotate(var(--r));opacity:0}}
+.reduced *,.reduced *:before,.reduced *:after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media(max-width:380px){.choice-grid{grid-template-columns:1fr}}
+
+/* ===== THEME 2: CRIME SCENE LAB ===== */
+:root{--bg:#050b0b;--panel:#0b1818;--raised:#12302e;--cyan:#35f0d0;--violet:#b388ff;--gold:#ffd400;--line:#1f4a47;--muted:#9cc0bb}
+.app{background:radial-gradient(ellipse at 50% -10%,#0f3a38,transparent 55%),radial-gradient(ellipse at 110% 95%,#2a1450,transparent 45%),var(--bg);box-shadow:0 0 0 1px #12302e,0 0 80px #35f0d012}
+.app:before{background-image:repeating-radial-gradient(circle at 85% 12%,#35f0d014 0 2px,transparent 2px 7px),repeating-radial-gradient(circle at 10% 90%,#b388ff10 0 2px,transparent 2px 8px);background-size:auto;opacity:1}
+.app:after{content:"";position:absolute;top:0;left:0;right:0;height:9px;z-index:30;pointer-events:none;background:repeating-linear-gradient(-45deg,#ffd400 0 14px,#111 14px 28px)}
+h1,h2,h3,.title{font-family:Oswald,Fredoka,sans-serif;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.panel{background:linear-gradient(150deg,#12302e,#0b1818);border-color:#1f4a47;border-radius:14px}
+.btn{border-radius:10px;background:#12302e;border-color:#2b6a65}
+.btn-primary{background:linear-gradient(180deg,#ffe24a,#ffd400);color:#161200;border-color:#b89a00;box-shadow:0 0 22px #ffd40044;font-family:Oswald,sans-serif;letter-spacing:.08em}
+.hero .title{background:linear-gradient(180deg,#fff6b0,#ffd400 60%,#ff9f1c);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 18px #ffd40055)}
+.mark{background:#ffd400;color:#111;border-color:#b89a00;border-radius:8px;font-weight:700}
+.eyebrow{color:var(--gold)}
+.tab.on{color:var(--gold);background:#ffd40014}
+.node{width:54px;height:54px;border-radius:8px 8px 4px 4px;background:#ffd400;color:#111;border:2px solid #111;box-shadow:0 4px 0 #8a7400,0 0 18px #ffd40044;font-family:Oswald;font-weight:700;font-size:26px;transform:rotate(-4deg)}
+.mission.locked .node{background:#3a4644;color:#9aa;box-shadow:0 4px 0 #222;filter:none}
+.mission.done .node{background:var(--green);box-shadow:0 4px 0 #1f8a5b,0 0 18px #45f5a155}
+.mission.done{border-color:#45f5a166}
+.mission:after{content:"";position:absolute;right:14px;top:14px}
+.mission.done:after{content:"CLOSED";color:var(--red);border:2px solid var(--red);border-radius:4px;padding:1px 6px;font:700 11px Oswald;letter-spacing:.12em;transform:rotate(8deg);opacity:.85}
+.sequence{background:#030909;border-color:#b388ff66;color:#d9c9ff;box-shadow:inset 0 0 26px #b388ff22,0 0 18px #b388ff1a}
+.note{border-left-color:var(--gold);background:#ffd40010}
+.evidence-card{border-color:#2b6a65;background:#0a1f1e;border-radius:10px}.evidence-card.marked{border-color:var(--gold)}
+.tile{border-radius:8px;background:#0a1f1e}
+.tile.selected,.choice.selected{background:#ffd4001f;box-shadow:0 0 16px #ffd40066}
+.case.win{border-color:var(--violet);box-shadow:0 0 36px #b388ff66,inset 0 0 30px #b388ff22}
+.progress span{background:linear-gradient(90deg,#b388ff,#ffd400);box-shadow:0 0 12px #ffd40088}
+.avatar{background:linear-gradient(135deg,#ffd400,#ff9f1c);color:#111}
+.tabbar{background:#071212f2}
+
+/* ===== ANIMATIONS ===== */
+.case{position:relative}
+.sequence{position:relative;overflow:hidden}
+.sequence:after{content:"";position:absolute;top:0;bottom:0;left:-60px;width:60px;background:linear-gradient(90deg,transparent,#b388ff66,transparent);animation:sweep 4.5s linear infinite;pointer-events:none}
+.sequence.scanning{border-color:var(--violet);box-shadow:0 0 30px #b388ff88,inset 0 0 30px #b388ff44}
+.sequence.scanning:after{animation-duration:.45s;background:linear-gradient(90deg,transparent,#35f0d0aa,transparent)}
+@keyframes sweep{to{left:100%}}
+.stamp{position:absolute;top:40%;left:50%;z-index:5;transform:translate(-50%,-50%) rotate(-12deg);border:4px solid;border-radius:8px;padding:4px 14px;font:700 clamp(22px,7vw,32px) Oswald,sans-serif;letter-spacing:.1em;white-space:nowrap;background:#050b0bd9;pointer-events:none;animation:slam .45s cubic-bezier(.2,1.6,.4,1) both}
+.stamp.good{color:var(--green);border-color:var(--green);box-shadow:0 0 24px #45f5a166}
+.stamp.bad{color:var(--red);border-color:var(--red);box-shadow:0 0 24px #ff718266;animation:slam .35s cubic-bezier(.2,1.6,.4,1) both,fadeout .3s .65s forwards}
+@keyframes slam{from{transform:translate(-50%,-50%) rotate(-12deg) scale(3.2);opacity:0}to{transform:translate(-50%,-50%) rotate(-12deg) scale(1);opacity:1}}
+@keyframes fadeout{to{opacity:0}}
+.floater{position:fixed;left:50%;bottom:130px;z-index:55;transform:translateX(-50%);font:700 20px Oswald,sans-serif;letter-spacing:.06em;color:var(--gold);text-shadow:0 0 14px #ffd400aa;pointer-events:none;white-space:nowrap;animation:rise 1.6s ease-out forwards}
+@keyframes rise{from{opacity:0;transform:translate(-50%,20px)}20%{opacity:1}to{opacity:0;transform:translate(-50%,-90px)}}
+.tile.pop{animation:tilepop .28s}
+@keyframes tilepop{0%{transform:scale(.55)}60%{transform:scale(1.22)}100%{transform:scale(1)}}
+.evidence-card.flash{animation:flash .6s}
+@keyframes flash{0%{box-shadow:0 0 0 #b388ff}40%{box-shadow:0 0 28px #b388ff;border-color:#b388ff}}
+.evidence-card p{animation:none}
+.mission.current{border-color:var(--gold)}
+.mission.current .node{animation:nodepulse 1.8s ease-in-out infinite}
+@keyframes nodepulse{50%{transform:rotate(-4deg) scale(1.12);box-shadow:0 4px 0 #8a7400,0 0 34px #ffd400cc}}
+.chip.urgent{color:var(--red);border-color:var(--red);animation:blink .7s infinite}
+@keyframes blink{50%{opacity:.35}}
+.drift{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.drift span{position:absolute;bottom:-40px;font:700 18px "Space Mono",monospace;color:var(--cyan);opacity:.14;animation:driftup linear infinite}
+@keyframes driftup{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(24px,-28vh) rotate(12deg)}50%{transform:translate(-8px,-57vh) rotate(-8deg)}75%{transform:translate(26px,-86vh) rotate(14deg)}100%{transform:translate(0,-115vh) rotate(0)}}
+.hero .title{animation:flicker 6s infinite}
+@keyframes flicker{0%,93%,100%{opacity:1}94%{opacity:.6}96%{opacity:1}97%{opacity:.7}}
+.q-caret:after{content:"▌";color:var(--gold);animation:blink .6s infinite}
+
+/* ===== MOTION, ART, MUSIC ===== */
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-9px) rotate(3deg)}}
+@keyframes sway{0%,100%{transform:rotate(8deg)}50%{transform:rotate(-16deg)}}
+@keyframes nod{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(3deg) translateY(2px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes beat{50%{transform:scale(1.14)}}
+@keyframes tabbounce{0%{transform:translateY(0)}40%{transform:translateY(-9px) scale(1.25)}100%{transform:translateY(-2px)}}
+.hero-art{display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:4px}
+.mascot{animation:floaty 4s ease-in-out infinite;filter:drop-shadow(0 8px 14px #000a)}
+.mmag{transform-origin:100px 115px;animation:sway 3s ease-in-out infinite}
+.mhead{transform-origin:70px 80px;animation:nod 3.2s ease-in-out infinite}
+.hx{position:relative;width:140px;height:182px;flex:none}
+.hx .helix{position:absolute;left:0;top:0;margin:0;transform:scale(.78);transform-origin:0 0}
+.ico{display:inline-block;animation:floaty 3.2s ease-in-out infinite}
+.mission:nth-child(2) .ico{animation-delay:-.6s}.mission:nth-child(3) .ico{animation-delay:-1.2s}.mission:nth-child(4) .ico{animation-delay:-1.8s}.mission:nth-child(5) .ico{animation-delay:-2.4s}
+.avatar{animation:floaty 3.6s ease-in-out infinite}
+.tab.on span{animation:tabbounce .45s forwards}
+.evidence{position:relative}.evidence .eyebrow,.evidence h2{padding-right:64px}
+.specimen{position:absolute;top:14px;right:14px;width:54px;height:54px;display:grid;place-items:center;font-size:28px}
+.specimen:before{content:"";position:absolute;inset:0;border:2px dashed var(--cyan);border-radius:50%;animation:spin 9s linear infinite;opacity:.7}
+.specimen span{animation:floaty 2.6s ease-in-out infinite}
+.orbit{position:relative;width:150px;height:150px;margin:0 auto 6px}
+.orbit .ring{position:absolute;inset:0;animation:spin 9s linear infinite}
+.orbit .ring span{position:absolute;left:50%;top:0;margin-left:-15px;width:30px;font-size:26px;text-align:center;transform-origin:15px 75px}
+.orbit .core{position:absolute;inset:0;display:grid;place-items:center;font-size:68px;animation:floaty 2.4s ease-in-out infinite}
+.musicbtn{position:fixed;top:calc(16px + var(--safe-t));right:max(12px,calc(50vw - 228px));width:40px;height:40px;border-radius:50%;border:2px solid var(--line);background:#0b1818d9;font-size:18px;z-index:31;display:grid;place-items:center;padding:0;color:#fff}
+.musicbtn.on{border-color:var(--gold);animation:beat .72s ease-in-out infinite}
+body.ingame .musicbtn{display:none}
+.topbar{padding-right:50px}
+.cf.em{background:none!important;width:auto;height:auto;font-size:22px}
+
+/* ===== READABILITY, LAB, RULES ===== */
+.step-label{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;margin:16px 0 6px;color:#e8f3f1}
+.step-label b{width:24px;height:24px;border-radius:50%;background:var(--gold);color:#111;display:grid;place-items:center;font:700 13px Oswald,sans-serif;flex:none}
+.step-label small{color:var(--muted);font-weight:700}
+.seq-line{margin-bottom:12px}.seq-line:last-child{margin-bottom:0}
+.seq-line.plain{color:#cdbfff;font-size:14px;line-height:1.5}
+.seq-label{display:block;font:700 11px Nunito,sans-serif;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}
+.seq-bases{display:flex;flex-wrap:wrap;gap:4px;font-size:21px;font-weight:700;letter-spacing:0}
+.seq-bases span{min-width:27px;text-align:center;padding:3px 4px;border-radius:7px;background:#ffffff0d}
+.seq-bases .sp{min-width:8px;background:none;padding:0}.seq-bases .sep{background:none;color:var(--muted);min-width:14px}.seq-bases .q{color:var(--muted);border:1px dashed #4c6288;background:none}
+.seq-bases span[data-b=A],.legend i[data-b=A],.lab-card i[data-b=A],.rules-body i[data-b=A]{color:var(--green)}
+.seq-bases span[data-b=T],.legend i[data-b=T],.lab-card i[data-b=T],.rules-body i[data-b=T]{color:var(--red)}
+.seq-bases span[data-b=G],.legend i[data-b=G],.lab-card i[data-b=G],.rules-body i[data-b=G]{color:var(--gold)}
+.seq-bases span[data-b=C],.legend i[data-b=C],.lab-card i[data-b=C],.rules-body i[data-b=C]{color:var(--blue)}
+.seq-bases span[data-b=U],.legend i[data-b=U],.lab-card i[data-b=U],.rules-body i[data-b=U]{color:#c28bff}
+.legend{display:flex;gap:6px;flex-wrap:wrap}.legend .chip{font-family:Nunito,sans-serif;font-size:12px}.legend i{font-style:normal;font-weight:700;font-family:"Space Mono",monospace}
+.lab-card{background:#0a1f1e;border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.lab-card h3{font-size:20px;margin:0 0 8px}.lab-card p{font-size:14.5px;line-height:1.6;color:#d6e8e5;margin:0 0 8px}
+.lab-card ul{margin:6px 0 8px;padding-left:20px;font-size:14.5px;line-height:1.7;color:#d6e8e5}
+.lab-card i{font-style:normal;font-weight:700;font-family:"Space Mono",monospace}
+.lab-card .sequence{margin:10px 0}
+.rules-art{font-size:58px;animation:floaty 2.8s ease-in-out infinite;line-height:1.2}
+.rules .actions{flex-direction:row;flex-wrap:nowrap}.rules .btn{width:auto;flex:1;padding:10px 8px}
+.rules-body{text-align:left;font-size:14.5px;line-height:1.55;color:#d6e8e5;margin-top:8px}
+.rules-body ol,.rules-body ul{padding-left:20px;margin:6px 0}.rules-body li{margin:6px 0}.rules-body p{margin:0 0 8px}
+.rules-body i{font-style:normal;font-weight:700;font-family:"Space Mono",monospace}
+.dots{display:flex;gap:6px;justify-content:center;margin:14px 0 4px}.dots i{width:8px;height:8px;border-radius:50%;background:#2b4a47;transition:width .25s}.dots i.on{background:var(--gold);width:22px}
+.skip{background:none;border:0;color:var(--muted);margin-top:10px;font-weight:700;text-decoration:underline;font-size:13px}
+
+/* ===== DRAG, HUD, BRIEFING ===== */
+.pal{min-width:56px;min-height:60px;font-size:24px;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.pal:active{cursor:grabbing}
+.tile.dragging{opacity:.35}
+.ghost{position:fixed;left:0;top:0;z-index:80;pointer-events:none;transform:translate(-50%,-75%) scale(1.25) rotate(-5deg);box-shadow:0 14px 28px #000c;display:grid;place-items:center;background:#12302e;opacity:.97}
+.slot.empty{border-style:dashed;color:var(--muted)}
+.slot.over{background:#ffd40033!important;border-color:var(--gold)!important;transform:scale(1.14);box-shadow:0 0 20px #ffd40099}
+body.dragging .slot:not(:disabled){outline:2px dashed #ffd40077;outline-offset:2px}
+body.dragging{cursor:grabbing}
+.stats{display:grid;grid-template-columns:1.15fr 1.2fr 1fr;gap:8px;margin:10px 0 8px}
+.stat{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:14px;background:#050b0b;border:1px solid var(--line);min-width:0}
+.si{font-size:22px;flex:none}
+.stat small{display:block;font:800 10px Nunito,sans-serif;letter-spacing:.12em;color:var(--muted)}
+.stat b{display:block;font:800 21px Orbitron,sans-serif;line-height:1.15;letter-spacing:.02em}
+.s-score{border-color:#ffd40077;box-shadow:inset 0 0 18px #ffd40018}.s-score b{color:var(--gold);text-shadow:0 0 12px #ffd40099}
+.s-acc{border-color:#45f5a177;box-shadow:inset 0 0 18px #45f5a118}.s-acc b{color:var(--green);text-shadow:0 0 12px #45f5a199}
+.s-xp{border-color:#35f0d077;box-shadow:inset 0 0 18px #35f0d018}.s-xp b{color:var(--cyan);text-shadow:0 0 12px #35f0d099}
+.bump{animation:bump .5s}@keyframes bump{40%{transform:scale(1.35);color:#fff}}
+.hud .sub{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.sample-card{position:relative;padding:16px;margin-bottom:12px}
+.sample-card .eyebrow,.sample-card p{padding-right:64px}.sample-card .sequence{margin:10px 0}
+.evidence{padding:14px 16px}
+.evidence summary{cursor:pointer;font-weight:800;list-style:none;display:flex;align-items:center;gap:8px}
+.evidence summary::-webkit-details-marker{display:none}
+.evidence summary:before{content:"▸";color:var(--gold);transition:transform .2s}
+.evidence[open] summary:before{transform:rotate(90deg)}
+.evidence summary small{color:var(--muted);font-weight:700}
+.specimen-big{position:relative;width:96px;height:96px;margin:0 auto;display:grid;place-items:center;font-size:56px}
+.specimen-big:before{content:"";position:absolute;inset:0;border:2px dashed var(--cyan);border-radius:50%;animation:spin 9s linear infinite}
+.specimen-big span{animation:floaty 2.6s ease-in-out infinite}
+.brief .brief-box{background:#050b0b;border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0;text-align:left}
+.brief h3{font-size:16px;margin:0 0 8px}.brief .note{text-align:left;margin:10px 0}.brief .legend{margin-top:8px}
+@media(max-width:400px){.stat b{font-size:16px}.si{font-size:18px}.stat{padding:7px 8px;gap:6px}}
+
+/* ===== LEVELS ===== */
+.tier{font:700 13px Oswald,sans-serif;letter-spacing:.1em;color:var(--gold);margin:16px 0 6px;text-transform:uppercase}
+.lvgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:6px 0 4px}
+.lvnode{position:relative;aspect-ratio:1;border-radius:14px;border:2px solid #2b6a65;border-bottom-width:4px;background:var(--raised);color:#f4f8ff;font:700 20px Oswald,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;line-height:1}
+.lvnode small{font-size:10px;color:var(--gold);letter-spacing:1px;margin-top:3px;height:12px}
+.lvnode.done{border-color:var(--green);background:#12332a}
+.lvnode.cur{border-color:var(--gold);animation:lvpulse 1.8s ease-in-out infinite}
+.lvnode.locked{opacity:.45;filter:saturate(.3)}
+@keyframes lvpulse{50%{box-shadow:0 0 22px #ffd400aa;transform:scale(1.07)}}
+.dense{grid-template-columns:repeat(5,1fr)!important}.dense .choice{justify-content:center;padding:8px 4px}
+.fstars{font-size:46px;letter-spacing:6px;color:var(--gold);text-shadow:0 0 20px #ffd400aa;animation:tilepop .6s both;margin:6px 0 10px}
+.award{grid-template-columns:1fr 1fr 1fr;margin:8px 0}
+.award .stat{flex-direction:column;text-align:center;padding:12px 6px;gap:2px}.award .stat b{font-size:24px}
+@media(max-width:400px){.award .stat b{font-size:18px}.lvnode{font-size:17px}}
+
+/* ===== PROFILE, BOSS, MAP ===== */
+.btn[hidden],.skip[hidden]{display:none!important}
+.app:before{opacity:.4}
+.nameinput{width:100%;min-height:50px;border-radius:14px;border:2px solid var(--line);background:#050b0b;color:#fff;font:700 18px Nunito,sans-serif;padding:0 14px;text-align:center}
+.nameinput:focus{border-color:var(--gold);outline:none}
+.chargrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+.charbtn{border:2px solid var(--line);border-bottom-width:4px;background:var(--raised);border-radius:16px;padding:8px 2px;color:#fff;display:flex;flex-direction:column;align-items:center;gap:2px;font:700 10px Nunito,sans-serif;line-height:1.15;transition:transform .15s}
+.charbtn span{font-size:34px;line-height:1.1}
+.charbtn.sel{border-color:var(--gold);background:#ffd4001f;box-shadow:0 0 18px #ffd40066;transform:translateY(-3px)}
+.charbtn.sel span{animation:floaty 1.6s ease-in-out infinite}
+.welcome .label{text-align:left}
+.profile-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}.profile-head>div:nth-child(2){flex:1;min-width:0}
+.hud-id{display:flex;align-items:center;gap:8px;min-width:0}.hud-av{font-size:30px;filter:drop-shadow(0 2px 4px #000a)}
+.bosspanel{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:12px;border-color:#ff718288;background:linear-gradient(150deg,#3a1226,#14091a);box-shadow:0 0 28px #ff718244}
+.bosspanel[hidden]{display:none}
+.bossface{font-size:54px;line-height:1;animation:floaty 2.4s ease-in-out infinite;filter:drop-shadow(0 0 12px #ff7182aa)}
+.bossinfo{flex:1;min-width:0}
+.bossname{font:700 17px Oswald,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#ffb3be}
+.hpbar{height:14px;border-radius:99px;background:#2a1020;border:1px solid #ff718288;overflow:hidden;margin:5px 0}
+.hpbar span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff3d5a,#ff9d4a);box-shadow:0 0 12px #ff3d5a;transition:width .6s}
+.hearts{font-size:20px;letter-spacing:2px}
+.bossface.hit{animation:bosshit .5s}.bossface.atk{animation:bossatk .5s}
+@keyframes bosshit{25%{transform:translateX(-10px) rotate(-12deg);filter:brightness(3)}50%{transform:translateX(10px) rotate(10deg)}}
+@keyframes bossatk{40%{transform:scale(1.5) translateY(14px)}}
+.mapchips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.mapwrap{position:relative;width:100%;margin-top:6px}
+.mapsvg{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+.mnode{position:absolute;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;border:3px solid #fff3b0;background:radial-gradient(circle at 30% 25%,#ffe24a,#d9a700);color:#161200;font:700 22px Oswald,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;box-shadow:0 5px 0 #8a7400,0 0 16px #ffd40055;line-height:1;z-index:3}
+.mnode small{font-size:9px;letter-spacing:1px;height:10px;margin-top:1px}
+.mnode.done{background:radial-gradient(circle at 30% 25%,#6dffbd,#1fa86b);border-color:#b6ffd9;box-shadow:0 5px 0 #136c43,0 0 16px #45f5a155;color:#06241a}
+.mnode.locked{background:#26332f;border-color:#3d4f4a;color:#7f908b;box-shadow:0 4px 0 #111}
+.mnode.cur{animation:mpulse 1.8s ease-in-out infinite}
+@keyframes mpulse{50%{box-shadow:0 5px 0 #8a7400,0 0 30px #ffd400cc;transform:translate(-50%,-50%) scale(1.1)}}
+.mnode.boss{width:76px;height:76px;font-size:36px;border-color:#ff7182;background:radial-gradient(circle at 30% 25%,#5a1f3d,#240b1c);box-shadow:0 6px 0 #5a1226,0 0 22px #ff718288;color:#fff}
+.mnode.boss small{color:#ff9aa8;font-size:10px}
+.mnode.boss.locked{opacity:.55;filter:grayscale(.7)}
+.mnode.boss.done{border-color:var(--green);box-shadow:0 6px 0 #136c43,0 0 18px #45f5a155}.mnode.boss.done small{color:var(--green)}
+.mnode.boss.cur{animation:bpulse 1.2s ease-in-out infinite}
+@keyframes bpulse{50%{box-shadow:0 6px 0 #5a1226,0 0 36px #ff3d5acc;transform:translate(-50%,-50%) scale(1.1)}}
+.mtier{position:absolute;left:50%;transform:translate(-50%,-50%);font:700 11px Oswald,sans-serif;letter-spacing:.14em;color:var(--gold);background:#050b0bdd;border:1px solid #ffd40066;border-radius:99px;padding:3px 12px;white-space:nowrap;z-index:2}
+.mdeco{position:absolute;font-size:26px;opacity:.5;animation:floaty 4s ease-in-out infinite;pointer-events:none;transform:translate(-50%,-50%)}
+.token{position:absolute;z-index:6;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.token .tok-av{font-size:42px;line-height:1;filter:drop-shadow(0 5px 6px #000a);animation:tokbob 1.4s ease-in-out infinite}
+.token.hopping .tok-av{animation:none;transform:rotate(-12deg) scale(1.1)}
+.token.land .tok-av{animation:landsq .45s}
+.token .tok-name{font:800 10px Nunito,sans-serif;background:#050b0bdd;border:1px solid var(--gold);color:var(--gold);padding:1px 7px;border-radius:99px;margin-bottom:2px;max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@keyframes tokbob{50%{transform:translateY(-7px)}}
+@keyframes landsq{0%{transform:scale(1.35,.65)}50%{transform:scale(.85,1.25)}100%{transform:scale(1)}}
+.spk{position:absolute;pointer-events:none;z-index:7;font-size:18px;animation:spk .9s ease-out forwards}
+@keyframes spk{from{opacity:1;transform:translate(-50%,-50%) scale(.5)}to{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.3)}}
+
+/* ===== CODON TABLE (colorful, readable) ===== */
+#evidence-detail{overflow-x:auto}
+.ctable{font-family:Nunito,sans-serif;color:#f4f8ff;min-width:330px}
+.ctitle{font:700 17px Oswald,sans-serif;letter-spacing:.06em;color:var(--gold);text-transform:uppercase;margin-bottom:4px}
+.cax{font:700 12.5px Nunito,sans-serif;color:#d6e8e5;margin-bottom:10px;line-height:1.45}
+.ctab{width:100%;border-collapse:separate;border-spacing:4px;table-layout:fixed}
+.ctab th{font:700 20px "Space Mono",monospace;text-align:center;padding:6px 0;border-radius:10px;color:#0b1010}
+.ctab th small{display:block;font:800 9px Nunito,sans-serif;letter-spacing:.08em;opacity:.8}
+.ctab th.base-U{background:#c28bff}.ctab th.base-C{background:#4aa8ff}.ctab th.base-A{background:#45f5a1}.ctab th.base-G{background:#ffd24a}
+.ctab th.corner{background:none;color:var(--muted);font:800 9px Nunito,sans-serif;width:30px}
+.ctab th.rowh{width:30px;padding:0}.ctab th.third{width:30px;background:#12302e;color:#e8f3f1;font-size:15px;padding:0}
+.ctab td{padding:0;vertical-align:top;border-radius:12px;overflow:hidden;border:2px solid #0b1818;background:#0b1818}
+.cl{display:flex;justify-content:space-between;align-items:center;gap:4px;height:28px;padding:0 6px;font:700 13px "Space Mono",monospace;border-bottom:1px solid #00000055}
+.cl:last-child{border-bottom:0}
+.cl span{letter-spacing:.02em}.cl b{font:800 13px Nunito,sans-serif}
+.ctab .third .cl,.ctab th.third div{height:28px;display:flex;align-items:center;justify-content:center;padding:0}
+.ctab th.third div{border-bottom:1px solid #00000055;font:700 15px "Space Mono",monospace}
+.ctab i[data-b]{font-style:normal;font-weight:700}
+.ctab i[data-b=U],.clegend i[data-b=U]{color:#7a3fd6}
+.cn{background:#ffd24a;color:#2a2000}.cp{background:#45f5a1;color:#04261a}.cb{background:#4aa8ff;color:#021a33}.ca{background:#ff7182;color:#33000a}.cs{background:#1a1a1a;color:#fff;box-shadow:inset 0 0 0 2px #ff3d5a}.cm{background:#b388ff;color:#1a0840}
+.cs b{color:#ff7182}
+.clegend,.akey{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.clegend .cd,.akey .cd{font:800 12px Nunito,sans-serif;padding:5px 10px;border-radius:99px;display:inline-flex;gap:5px}
+.akey .cd{font-weight:700}
+.clegend .cd.cs{background:#1a1a1a}
+.csub{font:800 11px Oswald,sans-serif;letter-spacing:.1em;color:var(--gold);margin:12px 0 2px;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="drift" id="drift" aria-hidden="true"></div>
+<button class="musicbtn" id="music-btn" type="button" aria-label="Toggle music">🎵</button>
+<section id="menu" class="view active" aria-label="Main menu">
+ <div class="topbar"><div class="brand"><span class="mark">⌁</span>GENETIC INVESTIGATION UNIT</div></div>
+ <div class="hero">
+  <div class="hero-art"><svg class="mascot" viewBox="0 0 140 180" width="124" height="160" aria-hidden="true"><g><path d="M28 176 L38 102 Q70 86 102 102 L112 176Z" fill="#9a7a45"/><path d="M70 94 L54 122 L70 176 L86 122Z" fill="#6d5129"/><rect x="34" y="138" width="72" height="8" fill="#4d3a1c"/></g><g class="mhead"><circle cx="70" cy="64" r="24" fill="#f2c79b"/><ellipse cx="70" cy="44" rx="40" ry="9" fill="#23233a"/><path d="M44 44Q46 14 70 14Q94 14 96 44Z" fill="#34344f"/><rect x="45" y="33" width="50" height="7" fill="#ffd400"/><circle cx="61" cy="66" r="3" fill="#111"/><circle cx="79" cy="66" r="3" fill="#111"/><path d="M62 75Q70 82 78 75" stroke="#111" fill="none" stroke-width="2.4" stroke-linecap="round"/></g><g class="mmag"><line x1="100" y1="116" x2="120" y2="96" stroke="#9a7a45" stroke-width="10" stroke-linecap="round"/><line x1="118" y1="98" x2="112" y2="104" stroke="#ffd400" stroke-width="5" stroke-linecap="round"/><circle cx="124" cy="72" r="17" fill="#35f0d033" stroke="#ffd400" stroke-width="4"/><text x="124" y="79" font-size="18" text-anchor="middle">🧬</text></g></svg><div class="hx"><div class="helix" aria-hidden="true"></div></div></div>
+  <span class="eyebrow">INTERACTIVE SCIENCE MYSTERY / SEASON 01</span>
+  <h1 class="title">DNA DETECTIVE</h1>
+  <p id="greet" style="font-weight:800;color:var(--gold);margin:0 0 6px"></p>
+  <p class="muted">Crack the genetic code. Follow the evidence. Become the Chief Genetic Detective.</p>
+  <div class="hud-mini"><span class="chip">RANK: <strong data-rank></strong></span><span class="chip">XP: <strong data-xp></strong></span><span class="chip">CASES: <strong data-completed></strong>/1</span></div>
+ </div>
+ <div class="menu-actions">
+  <button class="btn btn-primary wide" data-action="map" type="button">START INVESTIGATION ▶</button>
+  <button class="btn wide" id="continue" data-action="continue" type="button" hidden>CONTINUE INVESTIGATION</button>
+  <button class="btn wide" data-action="rules" type="button">📖 HOW TO PLAY</button>
+  <button class="btn" data-action="files" type="button">📁 Case Files</button>
+  <button class="btn" data-action="lab" type="button">🧪 DNA Lab</button>
+  <button class="btn" data-action="profile" type="button">🕵️ Profile</button>
+  <button class="btn" data-action="settings" type="button">⚙️ Settings</button>
+ </div>
+</section>
+
+<section id="hub" class="view" aria-label="Investigation hub">
+ <div class="topbar"><div class="brand"><span class="mark">⌁</span>DNA DETECTIVE / COMMAND</div><button class="btn" data-action="map" style="min-height:36px;padding:4px 12px;font-size:13px" type="button">🗺️ MAP</button></div>
+ <div class="panel profile-card">
+  <div class="avatar" data-avatar>🕵️</div>
+  <div><span class="eyebrow" data-nameline>DETECTIVE CREDENTIAL</span><h2 data-rank style="font-size:24px"></h2>
+   <div class="progress"><span id="hub-xp-bar"></span></div>
+   <span class="muted" style="font-size:13px"><b data-xp></b> XP · Cases solved <b data-completed></b>/1</span></div>
+ </div>
+ <span class="eyebrow" id="mission-board">LEVEL 1 / CASE FILE</span>
+ <h2 style="font-size:26px;margin-top:4px">Level 1 · Case file</h2>
+ <div class="path" id="mission-list"></div>
+</section>
+
+<section id="map" class="view" aria-label="Level map">
+ <div class="topbar"><div class="brand"><span class="mark">⌁</span>LEVEL MAP</div></div>
+ <div class="mapchips"><span class="chip"><span data-avatar></span> <b data-name></b></span><span class="chip">🏁 Levels <span id="unlocked-count"></span> / 50</span><span class="chip">⭐ <b data-score></b></span></div>
+ <div id="map-body"></div>
+</section>
+
+<section id="game" class="view" aria-label="Active investigation">
+ <header class="hud panel">
+  <div class="hud-row">
+   <div class="hud-id"><span class="hud-av" data-avatar></span><div><span class="eyebrow" id="hud-eyebrow">ACTIVE CASE</span><div id="hud-mission" class="title" style="font-size:20px;margin:0"></div></div></div>
+   <div class="actions"><button class="btn" id="hint" type="button">💡 Hint −10</button><button class="btn" id="pause" type="button">⏸</button><button class="btn" data-action="exitgame" type="button">✕</button></div>
+  </div>
+  <div class="stats">
+   <div class="stat s-score"><span class="si">⭐</span><div><small>SCORE</small><b id="hud-score">0</b></div></div>
+   <div class="stat s-acc"><span class="si">🎯</span><div><small>ACCURACY</small><b id="hud-accuracy">—</b></div></div>
+   <div class="stat s-xp"><span class="si">✨</span><div><small>XP</small><b id="hud-xp">0</b></div></div>
+  </div>
+  <div class="sub"><span class="chip" id="hud-rank"></span><span class="chip" id="hud-progress"></span><span class="chip" id="timer-chip" hidden>⏱ <b id="timer"></b>s</span></div>
+  <div class="progress"><span id="case-bar"></span></div>
+ </header>
+ <div class="panel bosspanel" id="boss-panel" hidden>
+  <div class="bossface" id="boss-face" aria-hidden="true">👾</div>
+  <div class="bossinfo"><div class="bossname" id="boss-name"></div><div class="hpbar"><span id="boss-hp"></span></div><small class="muted" id="boss-sub"></small></div>
+  <div class="hearts" id="boss-hearts" aria-label="Lives"></div>
+ </div>
+ <div class="panel case" id="case-panel">
+  <span class="eyebrow" id="case-id"></span>
+  <h2 id="question" style="font-size:clamp(22px,6vw,28px);margin-top:8px"></h2>
+  <div id="sequence" class="sequence" aria-label="Case sequence"></div>
+  <div id="puzzle"></div>
+  <p id="clue" class="note muted" hidden></p>
+  <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+  <p id="explanation" class="note" hidden></p>
+ </div>
+ <details class="panel evidence" id="evidence-panel">
+  <summary>🗂️ Evidence &amp; clues <small>(tap to open)</small></summary>
+  <div id="evidence-grid" class="evidence-grid" aria-label="Inspectable evidence cards" style="margin-top:10px"></div>
+  <div id="evidence-detail" class="note muted" role="status"></div>
+  <p id="objective" class="note"></p>
+ </details>
+ <div class="gamebar">
+  <button class="btn btn-primary" id="verify" type="button">🔬 VERIFY FINDING</button>
+  <button class="btn" id="retry" type="button">↺ RETRY</button>
+  <button class="btn btn-primary" id="next" type="button" hidden>NEXT ▶</button>
+ </div>
+</section>
+
+<section id="info" class="view" aria-label="Investigation information">
+ <div class="topbar"><div class="brand"><span class="mark">⌁</span>DNA DETECTIVE</div></div>
+ <main class="panel" style="padding:20px">
+  <span class="eyebrow">GENETIC INVESTIGATION UNIT / TERMINAL</span>
+  <h1 id="info-title" style="font-size:30px;margin:6px 0 14px"></h1>
+  <div id="info-content"></div>
+ </main>
+</section>
+
+<section id="final" class="view" aria-label="Level complete">
+ <div class="topbar"><div class="brand"><span class="mark">⌁</span>GENETIC INVESTIGATION UNIT</div></div>
+ <main class="panel" style="padding:22px;text-align:center">
+  <div class="orbit" aria-hidden="true"><div class="ring"><span>🎉</span><span style="transform:rotate(90deg)">🧬</span><span style="transform:rotate(180deg)">🔬</span><span style="transform:rotate(270deg)">🏅</span></div><div class="core">🏆</div></div>
+  <span class="eyebrow" id="final-eyebrow"></span>
+  <h1 class="title" id="final-title" style="font-size:36px;margin:8px 0"></h1>
+  <div class="fstars" id="final-stars" aria-hidden="true"></div>
+  <div class="stats award">
+   <div class="stat s-score"><span class="si">⭐</span><div><small>LEVEL SCORE</small><b id="fa-score">0</b></div></div>
+   <div class="stat s-xp"><span class="si">✨</span><div><small>XP EARNED</small><b id="fa-xp">0</b></div></div>
+   <div class="stat s-acc"><span class="si">🎯</span><div><small>ACCURACY</small><b id="fa-acc">0%</b></div></div>
+  </div>
+  <p class="muted" id="fa-total" style="font-size:14px"></p>
+  <p class="muted" id="final-copy" style="line-height:1.6"></p>
+  <div class="sequence" id="final-report" style="text-align:left">REFERENCE mRNA AUG | GAA | UAA<br>SAMPLE mRNA&nbsp;&nbsp;&nbsp;&nbsp; AUG | GAG | UAA<br>FINDING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Same amino-acid sequence</div>
+  <div class="actions mt-5" style="flex-direction:column">
+   <button class="btn btn-primary" id="final-next" style="width:100%" type="button">NEXT LEVEL ▶</button>
+   <button class="btn" style="width:100%" data-action="map" type="button">🗺️ LEVEL MAP</button>
+   <button class="btn" id="final-replay" style="width:100%" type="button">↺ Replay level</button>
+   <button class="btn" style="width:100%" data-action="profile" type="button">🕵️ View profile</button>
+  </div>
+ </main>
+</section>
+
+<nav class="tabbar" aria-label="Main navigation">
+ <button class="tab" data-action="menu" data-tab="menu" type="button"><span>🏠</span>Home</button>
+ <button class="tab" data-action="map" data-tab="map" type="button"><span>🗺️</span>Levels</button>
+ <button class="tab" data-action="lab" data-tab="lab" type="button"><span>🧪</span>Lab</button>
+ <button class="tab" data-action="profile" data-tab="profile" type="button"><span>🕵️</span>Profile</button>
+ <button class="tab" data-action="settings" data-tab="settings" type="button"><span>⚙️</span>Settings</button>
+</nav>
+
+<div id="welcome" class="overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-title" aria-hidden="true">
+ <div class="dialog panel rules welcome">
+  <div class="rules-art" aria-hidden="true">🧬</div>
+  <span class="eyebrow" id="welcome-eyebrow">NEW DETECTIVE</span>
+  <h2 id="welcome-title" class="mt-2" style="font-size:26px">Create your detective</h2>
+  <label class="label" for="welcome-name">Your name</label>
+  <input id="welcome-name" class="nameinput" type="text" maxlength="14" placeholder="Enter your name" autocomplete="nickname">
+  <p class="label">Choose your character</p>
+  <div class="chargrid" id="chargrid" role="radiogroup" aria-label="Characters"></div>
+  <p class="muted" id="welcome-pick" style="font-size:13px;min-height:18px;margin-top:8px"></p>
+  <div class="actions mt-2"><button class="btn" id="welcome-cancel" type="button" hidden>Cancel</button><button class="btn btn-primary" id="welcome-ok" type="button" disabled>START ▶</button></div>
+ </div>
+</div>
+<div id="brief" class="overlay" role="dialog" aria-modal="true" aria-labelledby="brief-title" aria-hidden="true">
+ <div class="dialog panel rules brief">
+  <div class="specimen-big" aria-hidden="true"><span id="brief-art">🧬</span></div>
+  <span class="eyebrow" id="brief-file"></span>
+  <h2 id="brief-title" class="mt-2" style="font-size:26px"></h2>
+  <p id="brief-intro" class="muted"></p>
+  <div class="brief-box"><h3>🔬 Specimen under review</h3><div id="brief-seq" class="sequence" style="margin:0"></div>
+   <div class="legend"><span class="chip"><i data-b="A">A</i> pairs with <i data-b="T">T</i></span><span class="chip"><i data-b="G">G</i> pairs with <i data-b="C">C</i></span></div></div>
+  <p id="brief-goal" class="note"></p>
+  <p id="brief-count" class="muted" style="font-size:13px"></p>
+  <div class="actions mt-2"><button class="btn" id="brief-back" type="button">◀ Back</button><button class="btn btn-primary" id="brief-ok" type="button">OK, START ▶</button></div>
+ </div>
+</div>
+<div id="rules" class="overlay" role="dialog" aria-modal="true" aria-labelledby="rules-title" aria-hidden="true">
+ <div class="dialog panel rules">
+  <div class="rules-art" id="rules-art" aria-hidden="true"></div>
+  <span class="eyebrow">HOW TO PLAY · <span id="rules-n"></span></span>
+  <h2 id="rules-title" class="mt-2" style="font-size:26px"></h2>
+  <div class="rules-body" id="rules-body"></div>
+  <div class="dots" id="rules-dots" aria-hidden="true"></div>
+  <div id="rules-actions" class="actions mt-2"></div>
+  <button class="skip" id="rules-skip" type="button">Skip for now</button>
+ </div>
+</div>
+<div id="modal" class="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+ <div class="dialog panel">
+  <span class="eyebrow">INVESTIGATION STATUS</span>
+  <h2 id="modal-title" class="mt-2" style="font-size:26px"></h2>
+  <p id="modal-copy" class="muted"></p>
+  <div id="modal-actions" class="actions justify-center mt-5"></div>
+ </div>
+</div>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const names = ["DNA Academy","Sequence Decoder","Mutation Mystery","The Codon Crime","The Final Investigation"];
+  const missionInfo = [
+    ["Master base pairing and the structure behind every clue.","INTRODUCTORY","🧬"],
+    ["Reconstruct hidden strands from partial DNA evidence.","DEVELOPING","🔎"],
+    ["Spot substitutions, inserted bases, and deletions.","INTERMEDIATE","🧫"],
+    ["Trace transcription and decode molecular signals.","ADVANCED","🧪"],
+    ["Combine every finding to close the final fictional case.","ELITE","🏆"]
+  ];
+  const ranks = ["Trainee Detective","Junior Geneticist","DNA Investigator","Senior Genetic Detective","Chief Genetic Detective","Master Geneticist","Legendary Investigator","Grand Master Detective","Genome Legend"];
+  const thresholds = [0,100,300,650,1100,1700,2500,3600,5000];
+  const pairs = {A:"T",T:"A",G:"C",C:"G"};
+  const templateRNA = {A:"U",T:"A",G:"C",C:"G"};
+  const complement = s => [...s].map(c => pairs[c]).join("");
+  const transcribe = s => [...s].map(c => templateRNA[c]).join("");
+  const storageKey = "dna-detective-v2";
+  const fresh = () => ({completed:[],earned:[],checkpoints:{},xp:0,score:0,last:0,started:false,attempts:0,correct:0,hintsUsed:0,bestTimed:0,sound:true,music:true,seenRules:false,levelsDone:[],lv:{},stars:{},lastLevel:0,bossesDone:[],name:"",avatar:"",motion:true,scale:1,achievements:[],perfectPairing:false});
+  let state = fresh();
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey));
+    if (saved && typeof saved === "object") {
+      state = {...state,...saved};
+      state.completed = [...new Set((Array.isArray(saved.completed)?saved.completed:[]).filter(n => Number.isInteger(n)&&n>=0&&n<5))];
+      state.earned = Array.isArray(saved.earned)?saved.earned.filter(x => typeof x==="string"):[];
+      state.achievements = Array.isArray(saved.achievements)?saved.achievements.filter(x => typeof x==="string"):[];
+      state.checkpoints = saved.checkpoints && typeof saved.checkpoints==="object"?saved.checkpoints:{};
+      for(const key of ["xp","score","attempts","correct","hintsUsed","bestTimed"]) state[key] = Number.isFinite(saved[key])?Math.max(0,saved[key]):0;
+      state.last = Number.isInteger(saved.last)&&saved.last>=0&&saved.last<5?saved.last:0;
+      state.scale = saved.scale===1.15?1.15:1;
+      state.motion = saved.motion!==false;
+      state.sound = saved.sound!==false;state.music = saved.music!==false;state.seenRules = saved.seenRules===true||state.completed.length>0;
+      state.levelsDone=[...new Set((Array.isArray(saved.levelsDone)?saved.levelsDone:[]).filter(n=>Number.isInteger(n)&&n>=2&&n<=50))];
+      state.stars=saved.stars&&typeof saved.stars==="object"?saved.stars:{};
+      state.bossesDone=[...new Set((Array.isArray(saved.bossesDone)?saved.bossesDone:[]).filter(n=>Number.isInteger(n)&&n>=3&&n<=48&&n%3===0))];
+      state.name=typeof saved.name==="string"?saved.name.slice(0,14):"";
+      state.avatar=typeof saved.avatar==="string"?saved.avatar.slice(0,12):"";
+      state.lastLevel=Number.isInteger(saved.lastLevel)&&saved.lastLevel>=0&&saved.lastLevel<=50?saved.lastLevel:0;
+      state.lv=saved.lv&&typeof saved.lv==="object"?saved.lv:{1:{score:state.score,xp:state.xp,att:state.attempts,cor:state.correct,hints:state.hintsUsed}};
+      state.started = saved.started===true || state.completed.length>0;
+    }
+  } catch (_) {}
+  const save = () => {try {localStorage.setItem(storageKey,JSON.stringify(state))} catch (_) {}};
+  const rankIndex = () => thresholds.reduce((result,n,i) => state.xp>=n?i:result,0);
+  const rank = () => ranks[rankIndex()];
+  const unlocked = i => i===0;
+  let lvl=0,boss=0,hearts=3,bossTry=0,pendingJump=null,current=0,step=0,stages=[],entries=[],selectedBase="A",choices={},marks=new Set(),hintLevel=0,solved=false,paused=false,remaining=0,tick=null,previousFocus=null,audioContext=null,tabKey="menu";
+
+  // build mission cards
+  $("mission-list").innerHTML = missionInfo.slice(0,1).map((m,i)=>`<article class="mission panel" data-mission-card="${i}"><div class="node">${i+1}</div><div><h3><span class="ico">${m[2]}</span> ${names[i]}</h3><p>${m[0]}</p></div><div class="mission-meta"><span class="chip d${i}">${m[1]}</span><span class="chip" style="color:var(--cyan)">60 XP BONUS</span></div><button class="btn" data-open="${i}" type="button">OPEN CASE ▶</button><small class="muted">${i?"Unlock: complete "+names[i-1]+".":"Available from the start."}</small></article>`).join("");
+
+  const getCtx=()=>{audioContext||=new (window.AudioContext||window.webkitAudioContext)();if(audioContext.state==="suspended")audioContext.resume();return audioContext};
+  function sound(kind) {
+    if(!state.sound)return;
+    try {
+      const ctx=getCtx(),t=ctx.currentTime;
+      const tone=(f,t0,d,type,v,f2)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t0);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t0+d);g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g).connect(ctx.destination);o.start(t0);o.stop(t0+d+.02)};
+      if(kind==="good")[523,659,784,1047].forEach((f,i)=>tone(f,t+i*.08,.3,"triangle",.07));
+      else if(kind==="bad"){tone(190,t,.28,"sawtooth",.05,110);tone(140,t+.12,.3,"sawtooth",.05,80)}
+      else if(kind==="scan")tone(220,t,.85,"sine",.045,990);
+      else if(kind==="tap"){tone(520,t,.13,"sine",.05,400);tone(1040,t,.08,"sine",.012)}else if(kind==="drop"){tone(330,t,.16,"sine",.07,230);tone(660,t+.02,.1,"sine",.02)}
+    } catch (_) {}
+  }
+  let music=null,musicBpm=84;
+  const mtof=n=>440*Math.pow(2,(n-69)/12);
+  const CH=[{r:45,p:[57,60,64],a:[69,72,76,81]},{r:41,p:[53,57,60],a:[65,69,72,77]},{r:48,p:[55,60,64],a:[67,72,76,79]},{r:40,p:[56,59,64],a:[68,71,76,80]}];
+  function startMusic(){
+    if(music||!state.music)return;
+    try{
+      const ctx=getCtx(),master=ctx.createGain();master.gain.value=.0001;master.connect(ctx.destination);master.gain.exponentialRampToValueAtTime(.16,ctx.currentTime+2);
+      const lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=1400;lp.connect(master);
+      const nb=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.1),ctx.sampleRate),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+      const note=(f,t,d,type,v,a=.01)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(lp);o.start(t);o.stop(t+d+.05)};
+      let step=0,next=ctx.currentTime+.1;
+      const sched=()=>{
+        const dur=60/musicBpm/2;
+        while(next<ctx.currentTime+.25){
+          const c=CH[Math.floor(step/8)%4],k=step%8;
+          if(k===0)c.p.forEach(n=>note(mtof(n),next,dur*8,"sine",.05,dur*3));
+          if(k%2===0)note(mtof(k===4?c.r+7:c.r),next,dur*1.6,"triangle",.17);
+          if(k===0||k===4)note(65,next,.2,"sine",.22);
+          if(k%2===1){const src=ctx.createBufferSource(),g=ctx.createGain(),hp=ctx.createBiquadFilter();src.buffer=nb;hp.type="highpass";hp.frequency.value=7000;g.gain.setValueAtTime(.05,next);g.gain.exponentialRampToValueAtTime(.0001,next+.05);src.connect(hp).connect(g).connect(master);src.start(next)}
+          if(Math.random()<.55)note(mtof(c.a[Math.floor(Math.random()*4)]),next,dur*2.2,"square",.022);
+          next+=dur;step++;
+        }
+      };
+      music={ctx,master,timer:setInterval(sched,60)};sched();
+    }catch(_){}
+    refresh();
+  }
+  function stopMusic(){
+    if(!music)return;const {ctx,master,timer}=music;clearInterval(timer);
+    master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setValueAtTime(Math.max(master.gain.value,.0002),ctx.currentTime);master.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.5);
+    setTimeout(()=>master.disconnect(),700);music=null;refresh();
+  }
+  function confetti(){
+    if(!state.motion)return;
+    for(let i=0;i<28;i++){const p=document.createElement("i");p.className="cf";
+      p.style.cssText=`left:${50+(Math.random()-.5)*30}%;background:${["#00e5ff","#9d5cff","#45f5a1","#ffd24a"][i%4]};--x:${(Math.random()-.5)*320}px;--r:${Math.random()*720}deg`;
+      if(i%5===0){p.className="cf em";p.textContent=["🧬","🔬","✨","🔍","🧪"][i/5|0];p.style.background="none"}document.body.append(p);setTimeout(()=>p.remove(),1400)}
+  }
+  let typeTimer=null;
+  function typeText(el,text){
+    clearInterval(typeTimer);
+    if(!state.motion){el.textContent=text;el.classList.remove("q-caret");return}
+    let n=0;el.textContent="";el.classList.add("q-caret");
+    typeTimer=setInterval(()=>{n+=2;el.textContent=text.slice(0,n);if(n>=text.length){clearInterval(typeTimer);el.classList.remove("q-caret")}},22);
+  }
+  function stamp(text,kind){
+    if(!state.motion)return;
+    const d=document.createElement("div");d.className="stamp "+kind;d.textContent=text;$("case-panel").append(d);
+    if(kind==="bad")setTimeout(()=>d.remove(),1000);
+  }
+  function floatText(text){
+    if(!state.motion)return;
+    const f=document.createElement("div");f.className="floater";f.textContent=text;document.body.append(f);setTimeout(()=>f.remove(),1700);
+  }
+  function refresh() {
+    document.querySelectorAll("[data-rank]").forEach(e=>e.textContent=rank());
+    document.querySelectorAll("[data-xp]").forEach(e=>e.textContent=state.xp);
+    document.querySelectorAll("[data-completed]").forEach(e=>e.textContent=state.completed.length);
+    $("continue").hidden=!state.started;
+    $("unlocked-count").textContent=levelsCompleted();syncMap();
+    document.querySelectorAll("[data-avatar]").forEach(e=>e.textContent=charOf()[1]);
+    document.querySelectorAll("[data-name]").forEach(e=>e.textContent=state.name||"Detective");
+    document.querySelectorAll("[data-score]").forEach(e=>e.textContent=state.score);
+    document.querySelectorAll("[data-nameline]").forEach(e=>e.textContent=state.name?`${state.name.toUpperCase()} · ${charOf()[2].toUpperCase()}`:"DETECTIVE CREDENTIAL");
+    $("greet").textContent=state.name?`${charOf()[1]} Welcome, ${state.name}!`:"";
+    const next=thresholds.find(n=>n>state.xp),prev=thresholds[rankIndex()];
+    $("hub-xp-bar").style.width=next?Math.min(100,(state.xp-prev)/(next-prev)*100)+"%":"100%";
+    document.querySelectorAll("[data-mission-card]").forEach((card,i)=>{
+      const locked=!unlocked(i),done=state.completed.includes(i),button=card.querySelector("[data-open]");
+      card.classList.toggle("locked",locked);card.classList.toggle("current",!locked&&!done);card.classList.toggle("done",done);button.disabled=locked;
+      card.querySelector(".node").textContent=locked?"🔒":done?"✓":i+1;
+      button.textContent=locked?"LOCKED":done?"REPLAY CASE ▶":"OPEN CASE ▶";
+      button.setAttribute("aria-label",locked?`Locked: complete ${names[i-1]} first`:`Open ${names[i]}`);
+    });
+    document.body.classList.toggle("reduced",!state.motion);$("music-btn").textContent=state.music?"🎵":"🔇";$("music-btn").classList.toggle("on",state.music&&!!music);
+    document.body.style.setProperty("--scale",state.scale);
+    $("hud-rank").textContent="🎖 "+rank();
+    const setStat=(id,v)=>{const e=$(id);v=String(v);if(e.textContent!==v){e.textContent=v;e.classList.remove("bump");void e.offsetWidth;e.classList.add("bump")}};
+    setStat("hud-xp",state.xp);setStat("hud-score",state.score);setStat("hud-accuracy",state.attempts?Math.round(state.correct/state.attempts*100)+"%":"—");
+    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.tab===tabKey));
+  }
+  function stopTimer(){clearInterval(tick);tick=null}
+  function show(id,tab){
+    if(id!=="game"){stopTimer();musicBpm=84}
+    tabKey=tab||({menu:"menu",hub:"map",map:"map",game:"map",final:"map"}[id])||tabKey;
+    document.body.classList.toggle("ingame",id==="game");
+    document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
+    refresh();window.scrollTo(0,0);
+    if(id==="map")requestAnimationFrame(()=>{if(pendingJump)runJump();else{setTok(firstUndone());focusMap(false)}});
+  }
+  const stage=(type,title,evidence,question,answer,explain,hints,extra={})=>({type,title,evidence,question,answer,explain,hints,...extra});
+  function buildStages(i) {
+    if(i===0) return [
+      stage("build","Base-pairing drill","SOURCE DNA  C G T A","Complete the opposite DNA strand.","GCAT","DNA pairs A with T and G with C. CGTA pairs with GCAT.",["A pairs with T; G pairs with C.","Pair each source base directly with the base below it."],{source:"CGTA"}),
+      stage("choice","Partner base","SOURCE BASE  G","Which base pairs with G?","C","G always pairs with C (and A pairs with T).",["Remember: G–C and A–T.","The partner of G is the other 3-bond base."],{options:["A","T","C","G"]}),
+      stage("mutation","Substitution","REFERENCE  ATGCCA\nSAMPLE       ATACCA","Identify the mutation type and affected position.",{kind:"Substitution",position:"3"},"Position 3 changes from G to A. Both sequences remain six bases long.",["Compare equal-length strands position by position.","The third base changes; no base is gained or lost."])
+    ];
+    if(i===1) return [
+      stage("build","Missing-base reconstruction","SOURCE DNA  ATGCCA\nOPPOSITE    ? A ? G ? T","Fill the missing positions; visible bases are fixed.","TACGGT","ATGCCA pairs with TACGGT.",["Use A–T and G–C pairing.","Fill positions 1, 3, and 5."],{source:"ATGCCA",fixed:[null,"A",null,"G",null,"T"]}),
+      stage("build","Full complementary strand","SOURCE DNA  CGTACGTA","Construct all eight complementary bases.","GCATGCAT","CGTACGTA pairs with GCATGCAT.",["Pair one position at a time.","A↔T; G↔C."],{source:"CGTACGTA"}),
+      stage("build","Timed decoding","SOURCE DNA  ATGCCGTAA","Build the complete complementary strand before time expires.","TACGGCATT","ATGCCGTAA pairs with TACGGCATT.",["Work left to right.","Verify before the timer reaches zero."],{source:"ATGCCGTAA",timed:60})
+    ];
+    if(i===2) return [
+      stage("mutation","Substitution","REFERENCE  ATGCCA\nSAMPLE       ATACCA","Identify the mutation type and affected position.",{kind:"Substitution",position:"3"},"Position 3 changes from G to A. Both sequences remain six bases long.",["Compare equal-length strands position by position.","The third base changes; no base is gained or lost."]),
+      stage("mutation","Insertion","REFERENCE  CGAT\nSAMPLE       CGGAT","Identify the mutation type and first inserted sample position.",{kind:"Insertion",position:"3"},"The sample contains an additional G at position 3: an insertion.",["The sample is one base longer.","Find the extra sample base; count from 1."]),
+      stage("mutation","Deletion","REFERENCE  ACTGA\nSAMPLE       ACGA","Identify the mutation type and deleted reference position.",{kind:"Deletion",position:"3"},"Reference T at position 3 is absent: a deletion. Its biological effect depends on context.",["The sample is one base shorter.","Find the missing reference base after AC."])
+    ];
+    if(i===3) return [
+      stage("build","Transcription","DNA TEMPLATE (3′→5′)  TAC CTT ATT\nCODING DNA (5′→3′)  ATG GAA TAA","Build the complementary mRNA (5′→3′).",transcribe("TACCTTATT"),"Template TAC CTT ATT yields mRNA AUG GAA UAA, read 5′→3′.",["RNA uses U instead of T.","Template T→A, A→U, C→G, G→C."],{source:"TACCTTATT",alphabet:"AUGC"}),
+      stage("choice","Reading frame","mRNA (5′→3′)  AUGGAAUAA","Which grouping uses the indicated reading frame?","AUG | GAA | UAA","Starting at the indicated 5′ end gives AUG | GAA | UAA.",["Read from the first base at the 5′ end.","Each consecutive codon has three bases."],{options:["AUG | GAA | UAA","A | UGG | AAU | AA","AU | GGA | AUA | A","UGG | AAU | AA"]}),
+      stage("choice","Start codon","mRNA CODON  AUG","What does AUG encode?","Methionine (start)","AUG encodes methionine and commonly acts as a start codon.",["AUG is the usual start signal.","The start signal encodes methionine."],{options:["Methionine (start)","Glutamic acid","Glycine","Stop"]}),
+      stage("choice","Middle codon","mRNA CODON  GAA","What does GAA encode?","Glutamic acid","GAA encodes glutamic acid.",["GAA and GAG encode the same amino acid.","Consult the DNA Lab reference."],{options:["Valine","Glutamic acid","Methionine","Stop"]}),
+      stage("choice","Termination","mRNA CODON  UAA","What does UAA signal?","Stop","UAA is a stop codon, not an amino acid.",["Translation terminates at this codon.","UAA is a stop signal."],{options:["Methionine","Glutamic acid","Stop","Glycine"]})
+    ];
+    return [
+      stage("clues","Evidence triage","FICTIONAL CASE / TRAINING SAMPLE F-05\nA sample record has been mislabeled in the archive.","Select the two records needed to compare molecular sequences.",["Reference record","Sample record"],"The reference and sample records establish what changed; a shipping label does not.",["Select records containing sequences.","The shipping label contains no molecular measurement."],{options:["Reference record","Sample record","Shipping label"]}),
+      stage("build","Strand reconstruction","REFERENCE CODING DNA (5′→3′)  ATG GAA TAA\nREFERENCE TEMPLATE DNA (3′→5′)  TAC CTT ATT","Build the complement of the first four reference coding-DNA bases.","TACC","The first four coding bases are ATGG; their DNA complement is TACC.",["Ignore spaces; the first four bases are ATGG.","Use A–T and G–C pairing."],{source:"ATGG"}),
+      stage("mutation","Changed specimen","REFERENCE CODING DNA  ATG GAA TAA\nSAMPLE CODING DNA       ATG GAG TAA","Identify the mutation and its position in the full coding strand.",{kind:"Substitution",position:"6"},"Coding-DNA position 6 changes from A to G; no base is inserted or deleted.",["Count positions across the entire strand.","Both strands have nine bases; inspect position 6."]),
+      stage("build","Template transcription","SAMPLE CODING DNA (5′→3′)  ATG GAG TAA\nSAMPLE TEMPLATE DNA (3′→5′)  TAC CTC ATT","Transcribe the sample template into mRNA (5′→3′).",transcribe("TACCTCATT"),"TAC CTC ATT yields mRNA AUG GAG UAA.",["RNA uses U in place of T.","Pair the 3′→5′ template to make 5′→3′ RNA."],{source:"TACCTCATT",alphabet:"AUGC"}),
+      stage("choice","Codon interpretation","SAMPLE mRNA (5′→3′)  AUG | GAG | UAA","What does the changed middle codon encode?","Glutamic acid","GAG encodes glutamic acid, as does reference GAA.",["Compare GAG with reference GAA.","Both encode glutamic acid."],{options:["Stop","Methionine","Glutamic acid","Valine"]}),
+      stage("choice","Scientific report","REFERENCE  AUG | GAA | UAA\nSAMPLE       AUG | GAG | UAA","Submit the evidence-supported conclusion.","A substitution produces the same amino-acid sequence","Coding-DNA position 6 changes A→G. GAA→GAG changes the codon, but both encode glutamic acid. The evidence does not establish a clinical outcome.",["Account for both the DNA change and codon meanings.","The middle codon changes, but the encoded amino acid does not."],{options:["A substitution produces the same amino-acid sequence","An insertion guarantees disease","A deletion removes methionine","The sample contains no DNA change"],requiresEvidence:true})
+    ];
+  }
+  const intros=[
+    "Your first case: pair the bases and spot a mutation. Three short questions.",
+    "Recover matching DNA records, then decode a strand against the clock.",
+    "Compare fictional samples without drawing medical conclusions.",
+    "Follow a template strand through RNA and translation signals.",
+    "Reconcile fictional reference and sample records to file a scientific report."
+  ];
+  function openMission(i,fromCheckpoint=false) {
+    if(!unlocked(i))return;
+    stopTimer();boss=0;lvl=0;current=i;stages=buildStages(i);
+    const savedStep=Number(state.checkpoints[i]);
+    step=fromCheckpoint&&Number.isInteger(savedStep)&&savedStep>=0&&savedStep<stages.length?savedStep:0;
+    state.last=i;state.lastLevel=0;state.started=true;save();show("game");renderStage();if(!fromCheckpoint||step===0)openBrief();
+  }
+  function makeButton(text,classes,callback) {
+    const button=document.createElement("button");button.type="button";button.className=classes;button.textContent=text;button.addEventListener("click",callback);return button;
+  }
+  function addLabel(parent,text){const p=document.createElement("p");p.className="label";p.textContent=text;parent.append(p)}
+  function evidenceFor(s) {
+    if(s.cards)return s.cards;
+    if(current===4)return [
+      ["Reference record","Fictional reference: coding DNA ATG GAA TAA; template DNA TAC CTT ATT; mRNA AUG GAA UAA."],
+      ["Sample record","Fictional sample F-05: coding DNA ATG GAG TAA; template DNA TAC CTC ATT; mRNA AUG GAG UAA."],
+      ["Codon table","AUG = methionine/start; GAA and GAG = glutamic acid; UAA = stop."],
+      ["Laboratory note","A synonymous coding change does not, by itself, establish a clinical outcome."],
+      ["Shipping label","Archive package tag; no molecular measurements."]
+    ];
+    if(current===3)return [
+      ["Template DNA","Read template DNA 3′→5′ to produce complementary mRNA 5′→3′."],
+      ["Codon table","AUG = methionine/start; GAA and GAG = glutamic acid; UAA = stop."],
+      ["Laboratory note","Read mRNA in consecutive, non-overlapping groups of three from the indicated 5′ end."]
+    ];
+    if(current===2)return [
+      ["Reference DNA",s.evidence.split("\n")[0]],
+      ["Altered DNA",s.evidence.split("\n")[1]],
+      ["Laboratory note","Positions start at 1. Insertions add bases; deletions remove bases."]
+    ];
+    return [
+      ["Sequence record",s.evidence],
+      ["Pairing reference",s.alphabet?"Template DNA: A→U, T→A, G→C, C→G.":"DNA: A↔T and G↔C."],
+      ["Laboratory note",s.timed?"Verify before time runs out.":"Check each position against the record."]
+    ];
+  }
+  function renderEvidence(s){
+    marks=new Set();$("evidence-detail").textContent="Tap Inspect on a card to read it here. (Mark relevant is only required in the final case.)";
+    const grid=$("evidence-grid");grid.replaceChildren();
+    evidenceFor(s).forEach(([title,detail])=>{
+      const card=document.createElement("article");card.className="evidence-card";
+      const heading=document.createElement("h3");heading.textContent=title;
+      const description=document.createElement("p");description.textContent="🔒 Tap Inspect to open this clue";
+      const inspect=makeButton("🔍 Inspect","btn",()=>{if(title==="Codon table"){description.textContent="📊 Table is shown below ↓";$("evidence-detail").innerHTML=codonTableHTML()}else{description.textContent=detail;$("evidence-detail").textContent=detail}card.classList.remove("flash");void card.offsetWidth;card.classList.add("flash");sound("click")});
+      inspect.setAttribute("aria-label",`Inspect ${title}`);
+      const mark=makeButton("Mark relevant","btn",()=>{
+        if(marks.has(title))marks.delete(title);else marks.add(title);
+        const active=marks.has(title);card.classList.toggle("marked",active);
+        mark.textContent=active?"Marked ✓":"Mark relevant";mark.setAttribute("aria-pressed",String(active));sound("click");
+      });
+      mark.setAttribute("aria-label",`Mark ${title} relevant`);mark.setAttribute("aria-pressed","false");
+      card.append(heading,description,inspect,mark);grid.append(card);
+    });
+  }
+  function renderBuild(s,parent){
+    addLabel(parent,"✋ Drag a base onto its matching slot (or tap a base, then tap a slot).");
+    const palette=document.createElement("div");palette.className="puzzle-grid";palette.setAttribute("role","group");palette.setAttribute("aria-label","Nucleotide tiles");
+    const slots=[];
+    const place=(i,base)=>{
+      const t=slots[i];if(!t||t.disabled)return;
+      entries[i]=base;t.textContent=base;t.dataset.b=base;t.classList.remove("empty","pop");void t.offsetWidth;t.classList.add("pop");
+      t.setAttribute("aria-label",`Position ${i+1}: ${base}`);sound("drop");
+    };
+    for(const base of s.alphabet||"ATGC"){
+      const button=makeButton(base,"tile pal",()=>{
+        if(button._dragAt&&performance.now()-button._dragAt<350)return;
+        selectedBase=selectedBase===base?null:base;
+        palette.querySelectorAll("button").forEach(b=>{const on=b.dataset.b===selectedBase;b.classList.toggle("selected",on);b.setAttribute("aria-pressed",String(on))});
+      });
+      button.dataset.b=base;button.setAttribute("aria-label",`Base ${base}. Drag onto a slot, or tap to select.`);button.setAttribute("aria-pressed","false");
+      enableDrag(button,base,place);palette.append(button);
+    }
+    parent.append(palette);
+    const row=document.createElement("div");row.className="puzzle-grid";row.setAttribute("role","group");row.setAttribute("aria-label","Sequence positions");
+    entries.forEach((value,i)=>{
+      const wrap=document.createElement("div");wrap.className="ladder-row";
+      if(s.source){const source=document.createElement("span");source.className="tile fixed";source.textContent=s.source[i];source.dataset.b=s.source[i];source.style.display="grid";source.style.placeItems="center";source.setAttribute("aria-label",`Source position ${i+1}: ${s.source[i]}`);wrap.append(source);const line=document.createElement("span");line.className="ladder-line";line.setAttribute("aria-hidden","true");wrap.append(line)}
+      const target=makeButton(value||"?","tile slot"+(value?"":" empty"),()=>{
+        if(selectedBase)place(i,selectedBase);
+        else if(entries[i]){entries[i]="";target.textContent="?";delete target.dataset.b;target.classList.add("empty");target.setAttribute("aria-label",`Position ${i+1}: empty`)}
+      });
+      target.dataset.i=i;if(value)target.dataset.b=value;slots[i]=target;
+      target.disabled=!!s.fixed?.[i];target.setAttribute("aria-label",`Position ${i+1}: ${value||"empty"}`);wrap.append(target);row.append(wrap);
+    });
+    parent.append(row);
+  }
+  function renderChoices(parent,title,options,key,multiple=false){
+    addLabel(parent,title);const grid=document.createElement("div");grid.className="choice-grid"+(options.length>6?" dense":"");grid.setAttribute("role","group");grid.setAttribute("aria-label",title);
+    options.forEach(value=>{
+      const button=makeButton(value,"btn choice",()=>{
+        if(multiple){choices[value]=!choices[value];button.classList.toggle("selected",!!choices[value]);button.setAttribute("aria-pressed",String(!!choices[value]))}
+        else {choices[key]=value;grid.querySelectorAll("button").forEach(b=>{b.classList.toggle("selected",b===button);b.setAttribute("aria-pressed",String(b===button))})}
+        sound("click");
+      });
+      button.setAttribute("aria-pressed","false");grid.append(button);
+    });
+    parent.append(grid);
+  }
+  function renderStage(){
+    stopTimer();const s=stages[step];entries=s.type==="build"?Array.from({length:s.answer.length},(_,i)=>s.fixed?.[i]||""):[];
+    choices={};selectedBase=null;hintLevel=0;solved=false;paused=false;
+    $("case-panel").classList.remove("win","shake");document.querySelectorAll(".stamp").forEach(e=>e.remove());
+    $("hud-mission").textContent=boss?bossName():lvl?`Level ${lvl}`:names[current];$("hud-eyebrow").textContent=boss?"⚔️ BOSS FIGHT":lvl?"LEVEL":"ACTIVE CASE";musicBpm=boss?124:s.timed?112:84;$("hud-progress").textContent=`${step+1} / ${stages.length}`;
+    $("case-id").textContent=`ANALYSIS ${String(step+1).padStart(2,"0")} / ${String(stages.length).padStart(2,"0")}`;
+    renderSeq($("sequence"),s.evidence);$("sequence").hidden=s.type==="build";$("objective").textContent=`🎯 ${s.title}: `+goalFor(s);
+    typeText($("question"),s.question);$("case-bar").style.width=step/stages.length*100+"%";renderEvidence(s);
+    $("evidence-panel").open=!!s.requiresEvidence||s.type==="clues";$("clue").hidden=true;$("explanation").hidden=true;$("feedback").textContent="Inspect the evidence, then verify your finding.";$("feedback").className="feedback";
+    $("verify").hidden=false;$("verify").disabled=false;$("retry").hidden=false;$("next").hidden=true;$("hint").disabled=false;$("hint").hidden=!!boss;$("boss-panel").hidden=!boss;if(boss){$("boss-face").textContent=BOSSES[boss/3-1][0];$("boss-name").textContent=bossName();$("boss-sub").textContent=`Round ${step+1} of ${stages.length} · no hints`;syncBoss()}
+    const puzzle=$("puzzle");puzzle.replaceChildren();
+    if(s.type==="build")renderBuild(s,puzzle);
+    if(s.type==="mutation"){renderChoices(puzzle,"Mutation class",["Substitution","Insertion","Deletion"],"kind");renderChoices(puzzle,"Affected position (count from 1)",Array.from({length:Math.max(s.maxPos||6,Number(s.answer.position))},(_,i)=>String(i+1)),"position")}
+    if(s.type==="choice")renderChoices(puzzle,"Select one finding",s.options,"answer");
+    if(s.type==="clues")renderChoices(puzzle,"Select exactly two evidence cards",s.options,"clues",true);
+    if(evidenceFor(s).some(c=>c[0]==="Codon table")){const tb=makeButton("📊 Open codon table","btn",()=>{$("evidence-panel").open=true;$("evidence-detail").innerHTML=codonTableHTML();$("evidence-detail").scrollIntoView({behavior:state.motion?"smooth":"auto",block:"center"})});tb.style.marginTop="10px";puzzle.append(tb)}
+    remaining=s.timed||0;$("timer-chip").hidden=!s.timed;$("timer-chip").classList.remove("urgent");$("timer").textContent=remaining;
+    if(s.timed)tick=setInterval(()=>{
+      if(paused||solved)return;
+      remaining=Math.max(0,remaining-1);$("timer").textContent=remaining;$("timer-chip").classList.toggle("urgent",remaining<=10);
+      if(remaining===0){stopTimer();$("feedback").textContent="Time expired. Retry this puzzle to restart the clock.";$("feedback").className="feedback bad";$("verify").disabled=true;if(boss)loseHeart()}
+    },1000);
+    refresh();window.scrollTo(0,0);
+  }
+  function unlockAchievements(){
+    const possible=[
+      ["First Case Solved",state.completed.length>=1],
+      ["Perfect Base Pairing",state.perfectPairing],
+      ["Mutation Master",levelsCompleted()>=5],
+      ["Codon Decoder",levelsCompleted()>=15],
+      ["Case Closed",state.completed.length>=1&&levelsCompleted()>=2],["Level 10 Cleared",levelsCompleted()>=10],["Level 25 Cleared",levelsCompleted()>=25],["All 50 Levels",levelsCompleted()>=50],["Boss Slayer",state.bossesDone.length>=1],["Boss Hunter",state.bossesDone.length>=5]
+    ];
+    const newly=[];possible.forEach(([name,earned])=>{if(earned&&!state.achievements.includes(name)){state.achievements.push(name);newly.push(name)}});return newly;
+  }
+  function verify(){
+    const s=stages[step];if(paused||solved||s.timed&&remaining===0)return;
+    let ready=false,correct=false;
+    if(s.type==="build"){ready=entries.every(Boolean);correct=entries.join("")===s.answer}
+    if(s.type==="mutation"){ready=!!choices.kind&&!!choices.position;correct=choices.kind===s.answer.kind&&choices.position===s.answer.position}
+    if(s.type==="choice"){ready=!!choices.answer;correct=choices.answer===s.answer}
+    if(s.type==="clues"){const selected=Object.keys(choices).filter(k=>choices[k]);ready=selected.length===2;correct=ready&&s.answer.every(k=>selected.includes(k))}
+    if(s.requiresEvidence&&(!marks.has("Reference record")||!marks.has("Sample record"))){$("evidence-panel").open=true;$("feedback").textContent="Mark both the reference and sample records relevant before submitting.";$("feedback").className="feedback bad";return}
+    if(!ready){$("feedback").textContent="Complete every required position or selection before verifying.";$("feedback").className="feedback bad";return}
+    state.attempts++;lvStat().att++;
+    if(!correct){
+      $("feedback").textContent="❌ Finding not confirmed. Compare the evidence and try again.";$("feedback").className="feedback bad";
+      const c=$("case-panel");c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake");stamp("NO MATCH","bad");if(boss)loseHeart();
+      sound("bad");save();refresh();return}
+    state.correct++;lvStat().cor++;solved=true;stopTimer();
+    const earnedKey=boss?`B${boss}:${step}`:lvl?`L${lvl}:${step}`:`${current}:${step}`,first=!state.earned.includes(earnedKey);
+    let points=0;
+    if(first){
+      points=Math.max(20,100-hintLevel*30)+(s.timed?Math.ceil(remaining/3):0);
+      state.earned.push(earnedKey);state.score+=points;state.xp+=20;lvStat().score+=points;lvStat().xp+=20;
+      if(current===0&&hintLevel===0&&state.attempts===state.correct)state.perfectPairing=true;
+      if(s.timed){const elapsed=s.timed-remaining;state.bestTimed=state.bestTimed?Math.min(state.bestTimed,elapsed):elapsed}
+    }
+    if(step<stages.length-1)state.checkpoints[ckey()]=step+1;
+    const badges=unlockAchievements();save();refresh();sound("good");
+    $("feedback").textContent=first?`✅ MATCH CONFIRMED / +${points} score · +20 XP${badges.length?" · Badge: "+badges.join(", "):""}`:"MATCH CONFIRMED / Replay complete; rewards already collected.";
+    $("feedback").className="feedback good";$("explanation").textContent=s.explain;$("explanation").hidden=false;
+    $("case-panel").classList.add("win");confetti();stamp("MATCH CONFIRMED","good");if(boss){bossFx("hit");syncBoss()}if(first)floatText("+"+points+" SCORE · +20 XP");
+    $("verify").hidden=true;$("hint").disabled=true;$("next").hidden=false;
+  }
+  function advance(){
+    if(!solved)return;
+    if(step<stages.length-1){step++;renderStage();return}
+    if(boss){
+      const fb=!state.bossesDone.includes(boss),bonus=100+boss*3;
+      if(fb){state.bossesDone.push(boss);state.bossesDone.sort((a,b)=>a-b);state.xp+=bonus;lvStat().xp+=bonus}
+      const bb=unlockAchievements();save();refresh();sound("good");
+      showLevelComplete(boss,fb,bb,true);confetti();return;
+    }
+    if(lvl){
+      const fl=!state.levelsDone.includes(lvl),bonus=30+lvl*2;
+      if(fl){state.levelsDone.push(lvl);state.levelsDone.sort((a,b)=>a-b);state.xp+=bonus;lvStat().xp+=bonus}
+      state.checkpoints["L"+lvl]=0;const lb=unlockAchievements();save();refresh();sound("good");
+      showLevelComplete(lvl,fl,lb);confetti();return;
+    }
+    const first=!state.completed.includes(current);
+    if(first){state.completed.push(current);state.completed.sort((a,b)=>a-b);state.xp+=60;lvStat().xp+=60}
+    state.checkpoints[ckey()]=0;
+    const badges=unlockAchievements();save();refresh();sound("good");
+    if(current===0){showLevelComplete(1,first,badges);confetti();return}
+    openModal("🎉 Case closed",`${names[current]} verified. ${first?"+60 completion XP. ":"Replay completed; no duplicate reward. "}${badges.length?"New achievement: "+badges.join(", ")+". ":""}${names[current+1]} is available.`,[
+      {label:"Next investigation",primary:true,fn:()=>openMission(current+1)},
+      {label:"Return to hub",fn:()=>show("hub")}
+    ]);
+    confetti();
+  }
+  function openModal(title,copy,actions){
+    previousFocus=document.activeElement;$("modal-title").textContent=title;$("modal-copy").textContent=copy;
+    const box=$("modal-actions");box.replaceChildren();
+    actions.forEach(action=>box.append(makeButton(action.label,"btn"+(action.primary?" btn-primary":""),()=>{
+      closeModal();action.fn();
+    })));
+    $("modal").classList.add("open");$("modal").setAttribute("aria-hidden","false");box.querySelector("button")?.focus();
+  }
+  function closeModal(){
+    $("modal").classList.remove("open");$("modal").setAttribute("aria-hidden","true");
+    if(previousFocus?.isConnected&&!previousFocus.closest(".view:not(.active)"))previousFocus.focus();
+  }
+  function renderSeq(el,text){
+    el.replaceChildren();
+    text.split("\n").forEach(line=>{
+      const row=document.createElement("div");row.className="seq-line";
+      const m=line.match(/^(.*?\S)\s{2,}(\S.*)$/);
+      if(m&&/^[ATGCU?\s|·]+$/.test(m[2])){
+        const lab=document.createElement("span");lab.className="seq-label";lab.textContent=m[1];
+        const b=document.createElement("div");b.className="seq-bases";
+        [...m[2]].forEach(ch=>{const sp=document.createElement("span");
+          if(ch===" ")sp.className="sp";else if("|·".includes(ch)){sp.className="sep";sp.textContent=ch}else{sp.textContent=ch;if(ch==="?")sp.className="q";else sp.dataset.b=ch}
+          b.append(sp)});
+        row.append(lab,b);
+      }else{row.classList.add("plain");row.textContent=line}
+      el.append(row);
+    });
+  }
+  function goalFor(s){
+    if(s.goal)return s.goal;
+    if(s.type==="build")return s.alphabet?"Turn the DNA template into RNA. Swap every base: A→U, T→A, G→C, C→G. Drag a base onto each slot, then press Verify.":"Build the matching strand. Every base has one partner: A with T, G with C. Drag a base onto each slot, then press Verify.";
+    if(s.type==="mutation")return "Compare REFERENCE and SAMPLE. Was a base swapped (substitution), added (insertion) or removed (deletion)? Then choose the position, counting from 1.";
+    if(s.type==="clues")return "Pick the two records that contain DNA sequences, then press Verify.";
+    return "Read the sample and the clues, then choose the one correct answer and press Verify.";
+  }
+  const RULES=[
+    ["🕵️","Welcome, Detective","<p>You have joined the <b>Genetic Investigation Unit</b>. Your job: solve <b>50 levels</b> using the science of DNA.</p><p>Each level is <b>one case with 3 questions</b>. Finish a level to unlock the next, and each is harder than the last. After every 3 levels a <b>boss fight</b> blocks the path: tougher questions, no hints and 3 hearts.</p>"],
+    ["🔬","How a puzzle works","<ol><li><b>Read the sample</b>: the DNA at the top of the Evidence panel.</li><li><b>Check the clues</b>: tap <b>Inspect</b> on the evidence cards.</li><li><b>Solve it</b>: build the strand or pick an answer in the case panel.</li><li>Press <b>Verify finding</b>. ✅ Right: you move on. ❌ Wrong: try again. Wrong answers cost no points, they only lower your accuracy %.</li></ol>"],
+    ["🧬","Building a strand","<p>1. <b>Drag</b> a base (<i data-b=\"A\">A</i> <i data-b=\"T\">T</i> <i data-b=\"G\">G</i> <i data-b=\"C\">C</i>) from the tray onto a slot. You can also tap a base, then tap a slot.</p><p>2. Match the pairs: <i data-b=\"A\">A</i> with <i data-b=\"T\">T</i>, and <i data-b=\"G\">G</i> with <i data-b=\"C\">C</i>.</p><p>3. Tap a filled slot to clear it. <b>Retry</b> resets the puzzle. In mutation puzzles you choose the type of change and its position (count from 1).</p>"],
+    ["⭐","Points, XP and hints","<ul><li>⭐ First correct answer on a puzzle: up to <b>100 score</b> and <b>20 XP</b></li><li>🏁 Finishing a case: <b>+60 XP</b></li><li>💡 A hint costs <b>10 score</b> and lowers that puzzle's reward by 30</li><li>⏱ Sequence Decoder has a <b>timed</b> puzzle. Faster means bonus points</li><li>🎖 Earn XP to rank up, from Trainee Detective to <b>Chief Genetic Detective</b> and beyond</li><li>🔁 Replaying a case gives no repeat rewards</li></ul>"],
+    ["🧪","Before you start","<p>New to DNA? Spend two minutes in the <b>🧪 DNA Lab</b>. It explains DNA, base pairing, RNA, codons and mutations in plain language.</p><p>You can reopen these rules any time from <b>Home → How to play</b> or from <b>Settings</b>. Your progress saves automatically.</p><p>Good luck, Detective! 🕵️</p>"]
+  ];
+  let rulesIdx=0;
+  function openRules(){rulesIdx=0;previousFocus=document.activeElement;$("rules").classList.add("open");$("rules").setAttribute("aria-hidden","false");renderRules()}
+  function closeRules(){$("rules").classList.remove("open");$("rules").setAttribute("aria-hidden","true");if(!state.seenRules){state.seenRules=true;save()}}
+  function renderRules(){
+    const r=RULES[rulesIdx],last=rulesIdx===RULES.length-1;
+    $("rules-art").textContent=r[0];$("rules-n").textContent=`${rulesIdx+1} / ${RULES.length}`;$("rules-title").textContent=r[1];$("rules-body").innerHTML=r[2];
+    $("rules-dots").innerHTML=RULES.map((_,i)=>`<i class="${i===rulesIdx?"on":""}"></i>`).join("");
+    $("rules-skip").hidden=last;
+    const box=$("rules-actions");box.replaceChildren();
+    if(rulesIdx>0)box.append(makeButton("◀ Back","btn",()=>{rulesIdx--;renderRules()}));
+    if(!last)box.append(makeButton("Next ▶","btn btn-primary",()=>{rulesIdx++;renderRules()}));
+    else{box.append(makeButton("🧪 DNA Lab","btn",()=>{closeRules();info("lab")}));box.append(makeButton("▶ Play","btn btn-primary",()=>{closeRules();show("map")}))}
+  }
+  const LAB=`
+<div class="lab-card"><h3>🧬 1. What is DNA?</h3><p>DNA is the <b>instruction manual</b> inside every living cell. It is shaped like a twisted ladder called a <b>double helix</b>.</p><p>The rungs of the ladder are made of four building blocks called <b>bases</b>:</p><ul><li><i data-b="A">A</i> = Adenine</li><li><i data-b="T">T</i> = Thymine</li><li><i data-b="G">G</i> = Guanine</li><li><i data-b="C">C</i> = Cytosine</li></ul><p>The order of these letters is the code. Detectives read it like a message.</p></div>
+<div class="lab-card"><h3>🔗 2. Base pairing: the #1 rule</h3><p>Each base fits with only one partner, like puzzle pieces:</p><ul><li><i data-b="A">A</i> pairs with <i data-b="T">T</i></li><li><i data-b="G">G</i> pairs with <i data-b="C">C</i></li></ul><p>So if one strand reads ATGC, the strand across from it must read TACG.</p><div class="sequence demo" data-seq="SOURCE DNA  ATGC~PARTNER DNA  TACG"></div><p>This is exactly what you do in DNA Academy and Sequence Decoder.</p><p><b>Bonus fact:</b> an A–T pair is held together by 2 hydrogen bonds, and a G–C pair by 3.</p></div>
+<div class="lab-card"><h3>📝 3. DNA vs RNA</h3><p>RNA is a single-strand copy of a gene. It uses <i data-b="U">U</i> (uracil) instead of <i data-b="T">T</i>.</p><p>Making RNA from a DNA template is called <b>transcription</b>. Swap each base: A→U, T→A, G→C, C→G.</p><div class="sequence demo" data-seq="TEMPLATE DNA  TAC CTT ATT~mRNA COPY  AUG GAA UAA"></div></div>
+<div class="lab-card"><h3>🔤 4. Codons and proteins</h3><p>RNA is read in groups of three letters called <b>codons</b>. Each codon stands for one <b>amino acid</b>, a building block of proteins.</p><ul><li>AUG = Methionine (the start signal)</li><li>GAA and GAG = Glutamic acid</li><li>UAA = STOP</li></ul><p>Different codons can code for the same amino acid. That matters when DNA changes.</p><div class="sequence demo" data-seq="mRNA CODONS  AUG | GAA | UAA"></div><p>Here is the full table. Find a codon by its first base (row), second base (column), then third base (line inside the box):</p><div class="codon-slot"></div></div>
+<div class="lab-card"><h3>🧫 5. Mutations</h3><p>A mutation is a change in the DNA letters:</p><ul><li><b>Substitution</b>: one base is swapped for another (same length)</li><li><b>Insertion</b>: an extra base is added (longer)</li><li><b>Deletion</b>: a base is removed (shorter)</li></ul><p>Count positions from 1, starting at the left. A change does not always change the protein or cause disease. It depends on the context.</p><p>Effects of a single-base change in a codon:</p><ul><li><b>Silent</b>: same amino acid</li><li><b>Missense</b>: a different amino acid</li><li><b>Nonsense</b>: the codon becomes STOP</li></ul><p>Adding or losing bases (not a multiple of 3) causes a <b>frameshift</b>: every codon after the change is read differently.</p><div class="sequence demo" data-seq="REFERENCE  ATGCCA~SAMPLE  ATACCA"></div><p>Here position 3 changed from G to A: a substitution.</p></div>
+<div class="lab-card"><h3>↔️ 6. Reading direction (5′ and 3′)</h3><p>The two DNA strands run in opposite directions. Their ends are called 5′ (five-prime) and 3′ (three-prime). Genes are read 5′→3′. The template strand is written 3′→5′, and the mRNA made from it reads 5′→3′.</p></div>
+<div class="lab-card"><h3>✅ Quick checklist</h3><ul><li>A pairs with T. G pairs with C.</li><li>In RNA, U replaces T.</li><li>A codon is 3 letters.</li><li>Mutations: substitution, insertion, deletion.</li><li>Count positions from 1.</li></ul></div>`;
+  function enableDrag(tile,base,place){
+    tile.addEventListener("pointerdown",e=>{
+      if(e.pointerType==="mouse"&&e.button!==0)return;
+      const sx=e.clientX,sy=e.clientY;let ghost=null,over=null;
+      const move=ev=>{
+        if(!ghost){
+          if(Math.hypot(ev.clientX-sx,ev.clientY-sy)<7)return;
+          ghost=document.createElement("div");ghost.className="tile ghost";ghost.dataset.b=base;ghost.textContent=base;document.body.append(ghost);
+          tile.classList.add("dragging");document.body.classList.add("dragging");
+        }
+        ghost.style.left=ev.clientX+"px";ghost.style.top=ev.clientY+"px";
+        const el=document.elementFromPoint(ev.clientX,ev.clientY),slot=el&&el.closest?el.closest(".slot"):null,ok=slot&&!slot.disabled?slot:null;
+        if(ok!==over){over&&over.classList.remove("over");over=ok;over&&over.classList.add("over")}
+      };
+      const up=()=>{
+        window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",up);window.removeEventListener("pointercancel",up);
+        document.body.classList.remove("dragging");
+        if(ghost){ghost.remove();tile.classList.remove("dragging");tile._dragAt=performance.now();if(over){over.classList.remove("over");place(Number(over.dataset.i),base)}}
+      };
+      window.addEventListener("pointermove",move);window.addEventListener("pointerup",up);window.addEventListener("pointercancel",up);
+    });
+  }
+  function openBrief(){
+    const st=stages[step];
+    if(boss){
+      const B=BOSSES[boss/3-1];
+      $("brief-art").textContent=B[0];$("brief-file").textContent="⚔️ BOSS FIGHT";$("brief-title").textContent=B[1];
+      $("brief-intro").textContent=`${B[1]} blocks the path after Level ${boss}! Win all ${stages.length} rounds. No hints allowed.`;
+      $("brief-count").textContent=`${stages.length} rounds · ❤️❤️❤️ 3 hearts · a wrong answer costs a heart`;
+    }else if(lvl){
+      const t=Math.floor((lvl-1)/10);
+      $("brief-art").textContent=["🧪","🧫","🔭","🧠","👑"][t];$("brief-file").textContent=`LEVEL ${lvl} / 50`;$("brief-title").textContent=`Level ${lvl}`;
+      $("brief-intro").textContent=`${TIERS[t][0]}: ${TIERS[t][1]}`;
+      $("brief-count").textContent=`${stages.length} analyses · difficulty ${"★".repeat(t+1)}${"☆".repeat(4-t)}${stages.some(x=>x.timed)?" · includes a timed puzzle ⏱":""}`;
+    }else{
+      $("brief-art").textContent=missionInfo[current][2];$("brief-file").textContent=`CASE FILE 0${current+1}`;$("brief-title").textContent=names[current];
+      $("brief-intro").textContent=intros[current];
+      $("brief-count").textContent=`${stages.length} analyses in this case. Open 🗂️ Evidence & clues any time for help.`;
+    }
+    renderSeq($("brief-seq"),st.evidence);$("brief-goal").textContent="🎯 "+goalFor(st);
+    paused=true;$("brief").classList.add("open");$("brief").setAttribute("aria-hidden","false");$("brief-ok").focus();
+  }
+  function closeBrief(){$("brief").classList.remove("open");$("brief").setAttribute("aria-hidden","true");paused=false}
+  const ckey=()=>boss?"B"+boss:lvl?"L"+lvl:current;
+  const lvKey=()=>boss?"B"+boss:lvl||1;
+  const lvStat=()=>state.lv[lvKey()]||={score:0,xp:0,att:0,cor:0,hints:0};
+  const levelDone=n=>n===1?state.completed.includes(0):state.levelsDone.includes(n);
+  const bossDone=n=>state.bossesDone.includes(n);
+  const levelUnlocked=n=>n>=1&&n<=50&&(n===1||(levelDone(n-1)&&((n-1)%3!==0||bossDone(n-1))));
+  function levelsCompleted(){return (levelDone(1)?1:0)+state.levelsDone.length}
+  const TIERS=[["Apprentice Lab","complement strands and simple mutations."],["Analyst Desk","transcription, codons and every mutation type."],["Specialist Unit","translate mRNA and classify mutation effects."],["Expert Division","reverse complements, frameshifts and DNA-to-protein."],["Master Detective","the longest strands, tight timers and every skill."]];
+  const tierName=n=>n===1?"Case Files":TIERS[Math.floor((n-1)/10)][0];
+  function mkRng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}}
+  const AAS={F:"Phenylalanine",L:"Leucine",S:"Serine",Y:"Tyrosine",C:"Cysteine",W:"Tryptophan",P:"Proline",H:"Histidine",Q:"Glutamine",R:"Arginine",I:"Isoleucine",M:"Methionine",T:"Threonine",N:"Asparagine",K:"Lysine",V:"Valine",A:"Alanine",D:"Aspartic acid",E:"Glutamic acid",G:"Glycine","*":"Stop"};
+  const CT="FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG";
+  const codonAA=c=>{const o="UCAG";return AAS[CT[16*o.indexOf(c[0])+4*o.indexOf(c[1])+o.indexOf(c[2])]]};
+  const CODON_REF=(()=>{const g={},o="UCAG";for(const a of o)for(const b of o)for(const c of o){(g[codonAA(a+b+c)]||=[]).push(a+b+c)}return Object.entries(g).map(([n,l])=>`${n}: ${l.join(" ")}`).join(" · ")})();
+  const AA3={F:"Phe",L:"Leu",S:"Ser",Y:"Tyr",C:"Cys",W:"Trp",P:"Pro",H:"His",Q:"Gln",R:"Arg",I:"Ile",M:"Met",T:"Thr",N:"Asn",K:"Lys",V:"Val",A:"Ala",D:"Asp",E:"Glu",G:"Gly"};
+  function codonTableHTML(){
+    const O="UCAG",ab=x=>`<i data-b="${x}">${x}</i>`;
+    const cls=c=>c==="*"?"cs":c==="M"?"cm":"AVLIFWPG".includes(c)?"cn":"STCYNQ".includes(c)?"cp":"KRH".includes(c)?"cb":"ca";
+    const lab=k=>k==="*"?"STOP":k==="M"?"Met ▶":AA3[k];
+    const thirds=`<div>${[...O].map(x=>`<div style="height:28px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #00000055">${x}</div>`).join("")}</div>`;
+    let h=`<div class="ctable"><div class="ctitle">📊 Genetic code table (mRNA)</div><div class="cax">1) Find the <b>1st base</b> on the left (row). 2) Find the <b>2nd base</b> on top (column). 3) Pick the <b>3rd base</b> line inside the box.</div><table class="ctab"><thead><tr><th class="corner">1st</th>${[...O].map(b=>`<th class="base-${b}"><small>2nd</small>${b}</th>`).join("")}<th class="corner">3rd</th></tr></thead><tbody>`;
+    for(const a of O){
+      h+=`<tr><th class="rowh base-${a}">${a}</th>`;
+      for(const b of O){h+=`<td>`;for(const c of O){const k=CT[16*O.indexOf(a)+4*O.indexOf(b)+O.indexOf(c)];h+=`<div class="cl ${cls(k)}"><span>${a+b+c}</span><b>${lab(k)}</b></div>`}h+=`</td>`}
+      h+=`<th class="third"><div>U</div><div>C</div><div>A</div><div>G</div></th></tr>`;
+    }
+    h+=`</tbody></table><div class="csub">Colour key</div><div class="clegend"><span class="cd cn">🟡 Nonpolar</span><span class="cd cp">🟢 Polar</span><span class="cd cb">🔵 Basic +</span><span class="cd ca">🔴 Acidic −</span><span class="cd cm">🟣 Start ▶</span><span class="cd cs">⬛ Stop</span></div><div class="csub">Amino acid names</div><div class="akey">`;
+    for(const k of Object.keys(AA3))h+=`<span class="cd ${cls(k)}">${AA3[k]} = ${AAS[k]}</span>`;
+    return h+`</div></div>`;
+  }
+  const PAIR_CARD=["Pairing reference","DNA: A↔T and G↔C. RNA from a DNA template: A→U, T→A, G→C, C→G."];
+  const CODON_CARD=["Codon table",CODON_REF];
+  const ri=(R,a,b)=>a+Math.floor(R()*(b-a+1));
+  const pk=(R,a)=>a[Math.floor(R()*a.length)];
+  const shuf=(R,a)=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+  const rseq=(R,n,al="ATGC")=>Array.from({length:n},()=>pk(R,[...al])).join("");
+  const grp=x=>x.match(/.{1,3}/g).join(" ");
+  const RC=x=>complement(x).split("").reverse().join("");
+  const LS=(type,title,evidence,question,answer,explain,hints,extra={},cards=[])=>stage(type,title,evidence,question,answer,explain,hints,{cards:[["Sample record",evidence],...cards],...extra});
+  const nonStopCodons=(R,k)=>{const c=["AUG"];while(c.length<k){const x=rseq(R,3,"UCAG");if(codonAA(x)!=="Stop")c.push(x)}return c};
+  const chainStage=(R,title,evidence,cods,question,hints,cards)=>{
+    const aas=cods.map(codonAA).filter(x=>x!=="Stop"),ans=aas.join(" – "),set=new Set([ans]);let g=0;
+    while(set.size<4&&g++<80){const d=[...aas],m=ri(R,0,d.length-1);d[m]=pk(R,Object.values(AAS).filter(x=>x!=="Stop"&&x!==d[m]));set.add(d.join(" – "))}
+    return LS("choice",title,evidence,question,ans,`The chain is ${ans}. Translation starts at AUG and ends at the stop codon.`,hints,{options:shuf(R,[...set])},cards);
+  };
+  const mutGen=(n,R,types)=>{
+    const L=Math.min(14,5+Math.floor(n/4)),ref=rseq(R,L);let kind=pk(R,types),p=1,sam="",why="";
+    if(kind==="Deletion"){let ok=false;for(let t=0;t<60&&!ok;t++){p=ri(R,1,L);ok=ref[p-2]!==ref[p-1]&&ref[p]!==ref[p-1]}if(!ok)kind="Substitution"}
+    if(kind==="Substitution"){p=ri(R,1,L);const nb=pk(R,[..."ATGC"].filter(b=>b!==ref[p-1]));sam=ref.slice(0,p-1)+nb+ref.slice(p);why=`Position ${p} changes from ${ref[p-1]} to ${nb}. The length stays ${L}.`}
+    else if(kind==="Insertion"){p=ri(R,1,L+1);const bad=[ref[p-2],ref[p-1]],nb=pk(R,[..."ATGC"].filter(b=>!bad.includes(b)));sam=ref.slice(0,p-1)+nb+ref.slice(p-1);why=`An extra ${nb} appears at sample position ${p}, so the sample is longer: an insertion.`}
+    else{sam=ref.slice(0,p-1)+ref.slice(p);why=`Reference ${ref[p-1]} at position ${p} is missing, so the sample is shorter: a deletion.`}
+    return LS("mutation",`${kind==="Substitution"?"Swap":kind==="Insertion"?"Extra base":"Missing base"} hunt`,`REFERENCE  ${ref}\nSAMPLE  ${sam}`,"Identify the mutation type and position. (Insertion: first extra sample base. Deletion: the missing reference base.)",{kind,position:String(p)},why,["Compare the strands from the left. Same length means substitution.","Count positions from 1 where the strands first differ."],{maxPos:L+1},[["Lab note","Positions start at 1. Insertions add bases; deletions remove bases; substitutions swap one."]]);
+  };
+  const GEN={
+    comp:(n,R)=>{const L=Math.min(14,3+Math.ceil(n/3)),sq=rseq(R,L),ans=complement(sq);
+      const f=n<16?ans.split("").map(c=>R()<Math.max(.1,.45-n*.02)?c:null):null;if(f&&f.every(Boolean))f[0]=null;
+      return LS("build",`Complement strand (${L} bases)`,`SOURCE DNA  ${sq}`,"Complete the opposite DNA strand.",ans,`${sq} pairs with ${ans}.`,["A pairs with T; G pairs with C.","Work left to right, one base at a time."],{source:sq,fixed:f},[PAIR_CARD])},
+    trans:(n,R)=>{const k=Math.min(4,2+Math.floor(n/12)),t=rseq(R,3*k),ans=transcribe(t);
+      return LS("build",`Transcription (${k} codons)`,`DNA TEMPLATE (3′→5′)  ${grp(t)}`,"Build the complementary mRNA (5′→3′).",ans,`${grp(t)} becomes ${grp(ans)}.`,["RNA uses U instead of T.","Template A→U, T→A, G→C, C→G."],{source:t,alphabet:"AUGC"},[PAIR_CARD])},
+    revcomp:(n,R)=>{const L=Math.min(12,4+Math.floor(n/5)),sq=rseq(R,L),ans=RC(sq);
+      return LS("build",`Reverse complement (${L} bases)`,`CODING DNA (5′→3′)  ${sq}`,"Write the partner strand in 5′→3′ order.",ans,`Pairing gives ${complement(sq)}; reading it from its own 5′ end gives ${ans}.`,["First pair each base, then flip the whole strand around.","The last base of the sample pairs with the first base of your answer."],{goal:"Write the partner strand 5′→3′: pair each base, then reverse the order. Drag bases into the slots, then press Verify."},[PAIR_CARD,["Direction","The partner strand runs the opposite way. Pair each base, then read your strand from its own 5′ end."]])},
+    mutS:(n,R)=>mutGen(n,R,["Substitution"]),
+    mut:(n,R)=>mutGen(n,R,["Substitution","Insertion","Deletion"]),
+    codon:(n,R)=>{let c;do{c=rseq(R,3,"UCAG")}while(codonAA(c)==="Stop"&&R()<.6);
+      const ans=codonAA(c),opts=shuf(R,[ans,...shuf(R,Object.values(AAS).filter(x=>x!==ans)).slice(0,3)]);
+      return LS("choice","Codon reader",`mRNA CODON  ${c}`,`What does ${c} encode?`,ans,`${c} encodes ${ans==="Stop"?"a STOP signal":ans}.`,["Use the Codon table in Evidence & clues.","Find your codon in the list."],{options:opts},[CODON_CARD])},
+    translate:(n,R)=>{const k=Math.min(6,2+Math.floor(n/8)),cods=[...nonStopCodons(R,k),pk(R,["UAA","UAG","UGA"])];
+      return chainStage(R,"Translation",`mRNA (5′→3′)  ${cods.join(" ")}`,cods,"Translate from AUG to the stop codon. Which amino-acid chain is made?",["Read one codon at a time and look each up.","The stop codon is not an amino acid."],[CODON_CARD])},
+    d2p:(n,R)=>{const k=Math.min(5,2+Math.floor(n/10)),cods=[...nonStopCodons(R,k),pk(R,["UAA","UAG","UGA"])],tm=[...cods.join("")].map(c=>({A:"T",U:"A",G:"C",C:"G"}[c])).join("");
+      return chainStage(R,"DNA to protein",`TEMPLATE DNA (3′→5′)  ${grp(tm)}`,cods,"Transcribe this template into mRNA, then translate it. Which chain is made?",["Step 1: template to mRNA (A→U, T→A, G→C, C→G).","Step 2: read the mRNA codon by codon."],[PAIR_CARD,CODON_CARD])},
+    effect:(n,R)=>{const want=pk(R,["Silent (same amino acid)","Missense (different amino acid)","Nonsense (new stop codon)"]);let ref="",sam="",eff="",tries=0;
+      for(;;){ref=rseq(R,3,"UCAG");const p=ri(R,0,2),nb=pk(R,[..."UCAG"].filter(b=>b!==ref[p]));sam=ref.slice(0,p)+nb+ref.slice(p+1);const a=codonAA(ref),b=codonAA(sam);if(a==="Stop")continue;eff=b==="Stop"?"Nonsense (new stop codon)":a===b?"Silent (same amino acid)":"Missense (different amino acid)";if(eff===want||++tries>600)break}
+      return LS("choice","Effect of a change",`REFERENCE codon  ${ref}\nSAMPLE codon  ${sam}`,"What kind of effect does this single-base change have?",eff,`${ref} encodes ${codonAA(ref)}. ${sam} encodes ${codonAA(sam)==="Stop"?"STOP":codonAA(sam)}. That is ${eff.split(" ")[0].toLowerCase()}.`,["Look both codons up in the table.","Same amino acid = silent. Different = missense. STOP = nonsense."],{options:shuf(R,["Silent (same amino acid)","Missense (different amino acid)","Nonsense (new stop codon)","Frameshift (reading frame moves)"])},[CODON_CARD,["Effect types","Silent: same amino acid. Missense: a different amino acid. Nonsense: a codon becomes STOP. Frameshift: bases added or lost (not a multiple of 3) shift the frame."]])},
+    frame:(n,R)=>{const k=ri(R,3,5),cd=["ATG"];while(cd.length<k){const x=rseq(R,3);if(!["TAA","TAG","TGA"].includes(x))cd.push(x)}cd.push("TAA");const ref=cd.join("");
+      const d=pk(R,[1,2,3,-1,-2,-3]);let sam;
+      if(d>0){const p=ri(R,3,ref.length-3);sam=ref.slice(0,p)+rseq(R,d)+ref.slice(p)}else{const m=-d,p=ri(R,3,ref.length-m-3);sam=ref.slice(0,p)+ref.slice(p+m)}
+      const df=sam.length-ref.length,inf=Math.abs(df)%3===0,ans=inf?"In-frame (frame unchanged)":"Frameshift (frame changes)";
+      return LS("choice","Reading frame check",`REFERENCE CODING DNA  ${grp(ref)}\nSAMPLE CODING DNA  ${sam}`,`The sample has ${Math.abs(df)} base${Math.abs(df)>1?"s":""} ${df>0?"more":"fewer"} than the reference. What happens to the reading frame?`,ans,inf?"A change of 3 bases (or a multiple of 3) keeps the codon frame intact.":"A change that is not a multiple of 3 shifts every codon after it: a frameshift.",["Count the length difference first.","Multiples of 3 keep the frame. Anything else shifts it."],{options:shuf(R,["Frameshift (frame changes)","In-frame (frame unchanged)","Silent (same amino acid)","No change to the DNA"])},[["Effect types","Frameshift: bases added or lost (not a multiple of 3) shift the frame. In-frame: a multiple of 3 bases is added or lost."]])},
+    hbond:(n,R)=>{const L=Math.min(12,4+Math.floor(n/4)),sq=rseq(R,L),at=[...sq].filter(c=>c==="A"||c==="T").length,gc=L-at,ans=at*2+gc*3,set=new Set([ans]);
+      for(const d of [1,-1,3,-2,2])if(set.size<4&&ans+d>0)set.add(ans+d);
+      return LS("choice","Hydrogen bonds",`SOURCE DNA  ${sq}`,"How many hydrogen bonds hold this strand to its partner strand?",String(ans),`${at} A–T pairs × 2 + ${gc} G–C pairs × 3 = ${ans}.`,["Count A and T bases (2 bonds each pair), then G and C (3 bonds each pair).","Add the two totals."],{options:shuf(R,[...set].map(String))},[["Bond facts","An A–T pair shares 2 hydrogen bonds. A G–C pair shares 3. Count every pair."]])}
+  };
+  function genLevel(n){
+    const R=mkRng(n*9973+17),k=3;
+    const pool=n<7?["comp","comp","mutS","codon","hbond"]:n<15?["comp","trans","mut","codon","hbond","mut"]:n<26?["comp","trans","mut","codon","translate","effect","hbond"]:n<41?["revcomp","trans","mut","translate","effect","frame","d2p","hbond","comp"]:["revcomp","d2p","mut","translate","effect","frame","hbond","trans","revcomp"];
+    let order=[];while(order.length<k)order.push(...shuf(R,pool));order=order.slice(0,k);
+    if(!order.some(t=>["comp","trans","revcomp"].includes(t)))order[0]=n<26?"comp":"revcomp";
+    const out=order.map(t=>GEN[t](n,R));
+    const per=Math.max(3.4,7-n*.07);let first=true;
+    out.forEach(st=>{if(st.type==="build"&&n>=10&&(first||n>=30)){st.timed=Math.max(15,Math.round(st.answer.length*per))}if(st.type==="build")first=false});
+    return out;
+  }
+  function startLevel(n,resume=false){
+    if(n<2||!levelUnlocked(n))return;
+    stopTimer();boss=0;lvl=n;current=5;stages=genLevel(n);
+    const sv=Number(state.checkpoints["L"+n]);step=resume&&Number.isInteger(sv)&&sv>0&&sv<stages.length?sv:0;
+    state.lastLevel=n;state.started=true;save();show("game");renderStage();if(!resume||step===0)openBrief();
+  }
+  function countUp(id,to){
+    const el=$(id);if(!state.motion){el.textContent=to;return}
+    let t0=null;const tickf=ts=>{t0??=ts;const k=Math.min(1,(ts-t0)/1100);el.textContent=Math.round(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(tickf)};requestAnimationFrame(tickf);
+  }
+  const BOSSES=[["🦠","Captain Contamination"],["🧟","Dr. Frameshift"],["👾","The Codon Crusher"],["🐍","Viper Strand"],["🕷️","The Helix Spider"],["👹","Baron Base-Swap"],["🦂","Scorpion Splicer"],["🐉","Dragon of Mutations"],["🤖","MechaGene"],["👽","Alien Genome"],["🦑","Kraken of Codons"],["🧛","Count Chromosome"],["🐺","Alpha Allele"],["🦖","T-Rex Transcriptase"],["😈","Professor Polymerase"],["💀","The Genome Reaper"]];
+  const bossName=n=>BOSSES[(n||boss)/3-1][1];
+  function genBoss(n,att=0){
+    const bd=n+8,R=mkRng(n*131+att*7+5);
+    const pool=bd<15?["trans","mut","effect"]:bd<26?["translate","effect","mut","trans","revcomp"]:["d2p","frame","revcomp","effect","translate","mut"];
+    const per=Math.max(3.2,6.5-bd*.07);
+    return shuf(R,pool).slice(0,3).map(t=>{const st=GEN[t](bd,R);if(st.type==="build")st.timed=Math.max(15,Math.round(st.answer.length*per));return st});
+  }
+  function startBoss(n,again=false){
+    if(!(n>=3&&n<=48&&n%3===0&&levelDone(n)))return;
+    stopTimer();bossTry=again?bossTry+1:0;boss=n;lvl=0;current=5;stages=genBoss(n,bossTry);step=0;hearts=3;
+    state.started=true;save();show("game");renderStage();openBrief();
+  }
+  function syncBoss(){
+    $("boss-hearts").textContent="❤️".repeat(hearts)+"🖤".repeat(3-hearts);
+    $("boss-hp").style.width=(100*(stages.length-step-(solved?1:0))/stages.length)+"%";
+  }
+  function bossFx(cls){const f=$("boss-face");f.classList.remove("hit","atk");void f.offsetWidth;f.classList.add(cls)}
+  function loseHeart(){
+    hearts=Math.max(0,hearts-1);bossFx("atk");syncBoss();
+    if(hearts===0){paused=true;stopTimer();setTimeout(()=>openModal("💀 Defeated!",`${bossName()} wins this round. Review the DNA Lab and try again!`,[{label:"⚔️ Rematch",primary:true,fn:()=>startBoss(boss,true)},{label:"🗺️ Back to map",fn:()=>show("map")}]),700)}
+  }
+  const CHARS=[["fox","🦊","Fox Agent"],["owl","🦉","Professor Owl"],["robot","🤖","Robo-Sleuth"],["panda","🐼","Panda Pathologist"],["cat","🐱","Cat Detective"],["scientist","🧑‍🔬","Lab Scientist"],["agent","🕵️","Secret Agent"],["astro","🧑‍🚀","Gene Explorer"]];
+  const charOf=()=>CHARS.find(c=>c[0]===state.avatar)||CHARS[6];
+  let wChar="",wEdit=false;
+  function wUpdate(){
+    const ok=$("welcome-name").value.trim().length>0&&!!wChar;$("welcome-ok").disabled=!ok;
+    const c=CHARS.find(x=>x[0]===wChar);$("welcome-pick").textContent=c?`${c[1]} ${c[2]} selected`:"Pick a character to continue.";
+  }
+  function openWelcome(edit=false){
+    wEdit=edit;wChar=edit?state.avatar:"";$("welcome-name").value=edit?state.name:"";
+    $("welcome-eyebrow").textContent=edit?"EDIT PROFILE":"NEW DETECTIVE";$("welcome-title").textContent=edit?"Edit your detective":"Create your detective";
+    $("welcome-cancel").hidden=!edit;$("welcome-ok").textContent=edit?"SAVE ✓":"START ▶";
+    $("chargrid").innerHTML=CHARS.map(c=>`<button class="charbtn${c[0]===wChar?" sel":""}" data-char="${c[0]}" type="button" role="radio" aria-checked="${c[0]===wChar}"><span>${c[1]}</span>${c[2]}</button>`).join("");
+    wUpdate();$("welcome").classList.add("open");$("welcome").setAttribute("aria-hidden","false");setTimeout(()=>$("welcome-name").focus(),50);
+  }
+  function closeWelcome(){$("welcome").classList.remove("open");$("welcome").setAttribute("aria-hidden","true")}
+  function welcomeDone(){
+    const nm=$("welcome-name").value.trim().slice(0,14);if(!nm||!wChar)return;
+    state.name=nm;state.avatar=wChar;save();closeWelcome();refresh();
+    if(wEdit){const a=document.querySelector(".view.active");if(a&&a.id==="info"){const t=$("info-title").textContent;info(t==="Settings"?"settings":"profile")}}
+    else if(!state.seenRules)setTimeout(openRules,250);
+  }
+  const SEQ=[];for(let n=1;n<=50;n++){SEQ.push({t:"l",n});if(n%3===0&&n<50)SEQ.push({t:"b",n})}
+  const MSTEP=92,MPAD=80,MH=MPAD*2+(SEQ.length-1)*MSTEP;
+  const nodePos=i=>({x:50+30*Math.sin(i*.85),y:MPAD+(SEQ.length-1-i)*MSTEP});
+  const seqDone=e=>e.t==="l"?levelDone(e.n):bossDone(e.n);
+  const firstUndone=()=>{const i=SEQ.findIndex(e=>!seqDone(e));return i<0?SEQ.length-1:i};
+  const idxOf=(t,n)=>SEQ.findIndex(e=>e.t===t&&e.n===n);
+  const pathTo=k=>{let d="";for(let i=0;i<=k;i++){const a=nodePos(i);if(i===0)d=`M ${a.x} ${a.y}`;else{const b=nodePos(i-1),my=(a.y+b.y)/2;d+=` C ${b.x} ${my} ${a.x} ${my} ${a.x} ${a.y}`}}return d};
+  function buildMap(){
+    const deco=["🧬","🧪","🔬","🧫","💡","🔍"];
+    let h=`<div class="mapwrap" id="mapwrap" style="height:${MH}px"><svg class="mapsvg" viewBox="0 0 100 ${MH}" preserveAspectRatio="none" aria-hidden="true"><path d="${pathTo(SEQ.length-1)}" fill="none" stroke="#35f0d033" stroke-width="10" stroke-linecap="round" vector-effect="non-scaling-stroke"/><path d="${pathTo(SEQ.length-1)}" fill="none" stroke="#ffffff2a" stroke-width="2" stroke-dasharray="3 9" stroke-linecap="round" vector-effect="non-scaling-stroke"/><path id="mp-done" d="" fill="none" stroke="#ffd400" stroke-width="5" stroke-linecap="round" vector-effect="non-scaling-stroke" style="filter:drop-shadow(0 0 6px #ffd400)"/></svg>`;
+    SEQ.forEach((e,i)=>{const p=nodePos(i);
+      if(i%2===1)h+=`<span class="mdeco" style="left:${p.x<50?86:14}%;top:${p.y}px;animation-delay:-${i%5}s">${deco[i%6]}</span>`;
+      if(e.t==="l"&&[11,21,31,41].includes(e.n))h+=`<div class="mtier" style="top:${p.y+MSTEP/2}px">LEVELS ${e.n}–${e.n+9} · ${TIERS[(e.n-1)/10][0].toUpperCase()}</div>`;
+      h+=e.t==="l"?`<button class="mnode" data-level="${e.n}" type="button" style="left:${p.x}%;top:${p.y}px" aria-label="Level ${e.n}"><b>${e.n}</b><small></small></button>`:`<button class="mnode boss" data-boss="${e.n}" type="button" style="left:${p.x}%;top:${p.y}px" aria-label="Boss fight after level ${e.n}"><span>${BOSSES[e.n/3-1][0]}</span><small>BOSS</small></button>`;
+    });
+    h+=`<div class="mtier" style="top:${nodePos(0).y+46}px">▲ START HERE ▲</div><div class="mtier" style="top:${nodePos(SEQ.length-1).y-62}px">🏆 FINISH</div><div class="token" id="token"><span class="tok-name" id="tok-name"></span><span class="tok-av" id="tok-av"></span></div></div>`;
+    $("map-body").innerHTML=h;
+  }
+  function syncMap(){
+    if(!$("mapwrap"))return;
+    const fu=firstUndone();
+    document.querySelectorAll("#mapwrap .mnode").forEach(b=>{
+      const isB=!!b.dataset.boss,n=Number(b.dataset.level||b.dataset.boss),i=idxOf(isB?"b":"l",n),dn=seqDone(SEQ[i]),un=i<=fu;
+      b.classList.toggle("locked",!un);b.classList.toggle("done",dn);b.classList.toggle("cur",un&&!dn);b.disabled=!un;
+      if(isB)b.querySelector("small").textContent=!un?"🔒":dn?"BEATEN":"BOSS";
+      else{b.querySelector("b").textContent=un?n:"🔒";b.querySelector("small").textContent=dn?"★".repeat(state.stars[n]||1):""}
+    });
+    $("mp-done").setAttribute("d",pathTo(fu));
+    $("tok-av").textContent=charOf()[1];$("tok-name").textContent=state.name||"You";
+  }
+  function setTok(i){const p=nodePos(i),t=$("token");t.style.left=p.x+"%";t.style.top=(p.y-22)+"px"}
+  function focusMap(smooth){const r=$("token").getBoundingClientRect();window.scrollTo({top:Math.max(0,window.scrollY+r.top-innerHeight*.55),behavior:smooth&&state.motion?"smooth":"auto"})}
+  function sparkle(i){
+    const p=nodePos(i),w=$("mapwrap");if(!state.motion)return;
+    for(let k=0;k<8;k++){const e=document.createElement("i");e.className="spk";e.textContent=["✨","⭐","💫","🧬"][k%4];e.style.left=p.x+"%";e.style.top=p.y+"px";e.style.setProperty("--dx",(Math.random()-.5)*110+"px");e.style.setProperty("--dy",-20-Math.random()*70+"px");w.append(e);setTimeout(()=>e.remove(),950)}
+  }
+  function hop(i0,i1,done){
+    const a=nodePos(i0),b=nodePos(i1),tok=$("token"),T=state.motion?850:1;let t0=null;
+    tok.classList.add("hopping");
+    const f=ts=>{t0??=ts;const k=Math.min(1,(ts-t0)/T);
+      tok.style.left=(a.x+(b.x-a.x)*k)+"%";tok.style.top=(a.y-22+(b.y-a.y)*k-Math.sin(Math.PI*k)*80)+"px";
+      const r=tok.getBoundingClientRect();window.scrollBy(0,(r.top-innerHeight*.55)*.12);
+      if(k<1)requestAnimationFrame(f);
+      else{tok.classList.remove("hopping");tok.classList.add("land");setTimeout(()=>tok.classList.remove("land"),450);sparkle(i1);sound("good");done&&done()}};
+    requestAnimationFrame(f);
+  }
+  function mapJump(fromIdx,then){pendingJump={from:fromIdx,then};show("map")}
+  function runJump(){
+    const j=pendingJump;pendingJump=null;const to=Math.min(SEQ.length-1,j.from+1);
+    setTok(j.from);focusMap(false);
+    setTimeout(()=>hop(j.from,to,()=>setTimeout(()=>{if($("map").classList.contains("active"))j.then()},650)),650);
+  }
+  function showLevelComplete(n,first,badges=[],isBoss=false){
+    const key=isBoss?"B"+n:n,st=state.lv[key]||{score:0,xp:0,att:0,cor:0},acc=st.att?st.cor/st.att:1;
+    let stars=acc>=.9?3:acc>=.7?2:1;if(isBoss)stars=Math.max(1,hearts);
+    state.stars[key]=Math.max(state.stars[key]||0,stars);save();
+    $("final-eyebrow").textContent=isBoss?`⚔️ BOSS FIGHT · AFTER LEVEL ${n}`:`LEVEL ${n} / 50 · ${tierName(n).toUpperCase()}`;
+    $("final-title").textContent=isBoss?`${bossName(n)} defeated!`:`Level ${n} complete!`;
+    const fs=$("final-stars");fs.textContent="★".repeat(stars)+"☆".repeat(3-stars);fs.style.animation="none";void fs.offsetWidth;fs.style.animation="";
+    countUp("fa-score",st.score);countUp("fa-xp",st.xp);$("fa-acc").textContent=Math.round(acc*100)+"%";
+    $("fa-total").textContent=`Total score ${state.score} · ${rank()} · ${state.xp} XP`;
+    $("final-report").hidden=true;
+    const idx=idxOf(isBoss?"b":"l",n),nxt=SEQ[idx+1];
+    const nextTxt=nxt?(nxt.t==="b"?`A boss blocks the path: ${bossName(nxt.n)}!`:`Next up: Level ${nxt.n} · ${tierName(nxt.n)}.`):"You have completed all 50 levels. You are a Genome Legend!";
+    $("final-copy").textContent=(state.name?`Great work, ${state.name}! `:"")+(!isBoss&&n===1?"Case closed! You paired the bases and spotted the mutation. ":"")+(first?"":"Replay finished, so no repeat rewards. ")+(badges.length?"New badge: "+badges.join(", ")+". ":"")+nextTxt;
+    const nb=$("final-next");nb.hidden=!nxt;
+    if(nxt){nb.textContent=nxt.t==="b"?"⚔️ BOSS FIGHT ▶":"NEXT LEVEL ▶";nb.onclick=()=>mapJump(idx,()=>nxt.t==="b"?startBoss(nxt.n):startLevel(nxt.n))}
+    const rb=$("final-replay");rb.textContent=isBoss?"↺ Rematch":"↺ Replay level";
+    rb.onclick=()=>isBoss?startBoss(n,true):n===1?openMission(0):startLevel(n);
+    show("final");
+  }
+  function info(type){
+    $("info-title").textContent={files:"Case Files",lab:"DNA Lab",profile:"Detective Profile",settings:"Settings"}[type];
+    const content=$("info-content");content.replaceChildren();
+    if(type==="files"){
+      const intro=document.createElement("p");intro.className="muted";intro.textContent="Your archive of fictional training investigations.";content.append(intro);
+      names.slice(0,1).forEach((name,i)=>{
+        const row=document.createElement("div");row.className="setting-row";
+        const text=document.createElement("div");text.textContent=name;
+        const status=document.createElement("small");status.className="muted block";status.textContent=state.completed.includes(i)?"SOLVED / REPLAY AVAILABLE":unlocked(i)?"AVAILABLE":"LOCKED / COMPLETE PREVIOUS CASE";
+        text.append(status);row.append(text);
+        if(unlocked(i))row.append(makeButton("Open","btn",()=>openMission(i)));
+        content.append(row);
+      });
+    }
+    if(type==="lab"){
+      const row=document.createElement("div");row.className="actions";
+      row.append(makeButton("📖 How to play","btn",()=>openRules()),makeButton("▶ Start DNA Academy","btn btn-primary",()=>openMission(0)));
+      const lab=document.createElement("div");lab.innerHTML=LAB;
+      lab.querySelectorAll(".demo").forEach(d=>renderSeq(d,d.dataset.seq.split("~").join("\n")));
+      lab.querySelectorAll(".codon-slot").forEach(d=>d.innerHTML=codonTableHTML());
+      content.append(row,lab);
+    }
+    if(type==="profile"){
+      const stats=document.createElement("div");stats.className="sequence";
+      stats.textContent=`${rank()}\nLEVELS COMPLETED  ${levelsCompleted()} / 50\nBOSSES DEFEATED  ${state.bossesDone.length} / 16\nCASES COMPLETED  ${state.completed.length} / 1\nTOTAL XP  ${state.xp}  ·  SCORE  ${state.score}\nOVERALL ACCURACY  ${state.attempts?Math.round(state.correct/state.attempts*100):0}%\nCORRECT FINDINGS  ${state.correct} / ${state.attempts}\nHINTS USED  ${state.hintsUsed}\nBEST TIMED RESULT  ${state.bestTimed?state.bestTimed+" seconds":"Not yet recorded"}`;
+      const heading=document.createElement("h2");heading.textContent="Unlocked achievements";
+      const head=document.createElement("div");head.className="profile-head";const av=document.createElement("div");av.className="avatar";av.textContent=charOf()[1];
+      const nm=document.createElement("div"),hn=document.createElement("strong");hn.textContent=state.name||"Detective";hn.style.fontSize="22px";hn.style.display="block";
+      const sub=document.createElement("div");sub.className="muted";sub.textContent=`${charOf()[2]} · ${rank()}`;nm.append(hn,sub);
+      head.append(av,nm,makeButton("✏️ Edit","btn",()=>openWelcome(true)));content.append(head,stats,heading);
+      if(!state.achievements.length){const empty=document.createElement("p");empty.className="muted";empty.textContent="No achievements yet. Solve your first case to earn a badge.";content.append(empty)}
+      state.achievements.forEach(name=>{const badge=document.createElement("div");badge.className="badge";badge.textContent="🏅 "+name;content.append(badge)});
+    }
+    if(type==="settings"){
+      const p=document.createElement("p");p.className="muted";p.textContent="Adjust sound, music and animations.";content.append(p);
+      [["sound","Sound effects"],["music","Background music"],["motion","Animated effects"]].forEach(([key,title])=>{
+        const row=document.createElement("div");row.className="setting-row";const label=document.createElement("strong");label.textContent=title;
+        const toggle=makeButton(state[key]?"ON":"OFF","btn",()=>{
+          state[key]=!state[key];toggle.textContent=state[key]?"ON":"OFF";toggle.setAttribute("aria-pressed",String(state[key]));save();refresh();if(key==="sound"&&state.sound)sound("click");if(key==="music")state.music?startMusic():stopMusic();
+        });
+        toggle.setAttribute("aria-label",`${title}: ${state[key]?"on":"off"}`);toggle.setAttribute("aria-pressed",String(state[key]));row.append(label,toggle);content.append(row);
+      });
+      const row=document.createElement("div");row.className="setting-row";const label=document.createElement("strong");label.textContent="Text and interface size";
+      const size=makeButton(state.scale>1?"LARGE":"STANDARD","btn",()=>{
+        state.scale=state.scale>1?1:1.15;size.textContent=state.scale>1?"LARGE":"STANDARD";save();refresh();
+      });
+      row.append(label,size);content.append(row);
+      {const pr=document.createElement("div");pr.className="setting-row";const pl=document.createElement("strong");pl.textContent=`${charOf()[1]} ${state.name||"Detective"}`;pr.append(pl,makeButton("EDIT PROFILE","btn",()=>openWelcome(true)));content.append(pr)}
+      {const hr=document.createElement("div");hr.className="setting-row";const hl=document.createElement("strong");hl.textContent="How to play";hr.append(hl,makeButton("OPEN","btn",()=>openRules()));content.append(hr)}
+      content.append(makeButton("Reset game progress","btn mt-7",()=>openModal("Reset all progress?","This removes saved cases, XP, scores, achievements, and settings from this browser.",[
+        {label:"Cancel",primary:true,fn:()=>{}},
+        {label:"Yes, reset everything",fn:()=>{state=fresh();save();refresh();show("menu");openWelcome()}}
+      ])));
+      const note=document.createElement("p");note.className="muted mt-5";note.textContent="Progress is saved in this browser when available. It does not sync between devices.";content.append(note);
+    }
+    show("info",type==="files"?"map":type);
+  }
+  document.addEventListener("click",event=>{
+    const action=event.target.closest("[data-action]")?.dataset.action;
+    if(action){
+      if(action==="continue"){if(state.lastLevel>=2&&levelUnlocked(state.lastLevel))startLevel(state.lastLevel,true);else openMission(0,true)}
+      else if(action==="exitgame")show("map");
+      else if(action==="rules")openRules();
+      else if(["files","lab","profile","settings"].includes(action))info(action);
+      else show(action);
+    }
+    const lvb=event.target.closest("[data-level]");
+    if(lvb){const n=Number(lvb.dataset.level);if(n===1)openMission(0);else startLevel(n)}
+    const bsb=event.target.closest("[data-boss]");if(bsb)startBoss(Number(bsb.dataset.boss));
+    const mission=event.target.closest("[data-open]");
+    if(mission)openMission(Number(mission.dataset.open));
+  });
+  $("hint").addEventListener("click",()=>{
+    if(solved||paused||boss||hintLevel>=2)return;
+    openModal("Use a hint?","Reveal the next clue for up to 10 score. It also reduces this stage's first-time score reward by 30.",[
+      {label:"Keep investigating",primary:true,fn:()=>{}},
+      {label:"Use hint",fn:()=>{
+        const s=stages[step];$("clue").textContent=`HINT ${hintLevel+1} / 2 — ${s.hints[hintLevel]}`;$("clue").hidden=false;
+        hintLevel++;state.hintsUsed++;state.score=Math.max(0,state.score-10);lvStat().score=Math.max(0,lvStat().score-10);lvStat().hints++;$("hint").disabled=hintLevel>=2;save();refresh();
+      }}
+    ]);
+  });
+  $("verify").addEventListener("click",()=>{
+    if(paused||solved)return;
+    const seq=$("sequence");seq.classList.add("scanning");$("feedback").textContent="🔬 ANALYZING SAMPLE…";sound("scan");$("feedback").className="feedback";$("verify").disabled=true;
+    setTimeout(()=>{seq.classList.remove("scanning");const s=stages[step];$("verify").disabled=!!s.timed&&remaining===0;verify()},state.motion?900:0);
+  });
+  $("retry").addEventListener("click",()=>{if(!paused)renderStage()});
+  $("next").addEventListener("click",advance);
+  $("pause").addEventListener("click",()=>{
+    if(solved)return;
+    paused=true;openModal("Investigation paused","Your selections and remaining time are waiting.",[
+      {label:"Resume investigation",primary:true,fn:()=>{paused=false}},
+      {label:"Return to hub",fn:()=>{paused=false;show("map")}},
+      {label:"Settings",fn:()=>{paused=false;info("settings")}}
+    ]);
+  });
+  document.addEventListener("keydown",event=>{
+    if(event.key==="Escape"&&$("game").classList.contains("active")&&!$("modal").classList.contains("open")){$("pause").click();return}
+    if(event.key==="Tab"&&$("modal").classList.contains("open")){
+      const buttons=[...$("modal-actions").querySelectorAll("button")],first=buttons[0],last=buttons.at(-1);
+      if(!buttons.length)return;
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+    }
+  });
+  document.querySelectorAll(".helix").forEach(h=>{for(let i=0;i<12;i++){const r=document.createElement("div");r.className="rung";r.style.setProperty("--i",i);r.innerHTML="<b></b><i></i><i></i>";h.append(r)}});
+  const drift=$("drift");
+  const sym=["A","T","G","C","🧬","🔬","🔍","🧪","🕵️","🧫","A","T","G","C","💡","🧬"];
+  sym.forEach((c,i)=>{const e=document.createElement("span"),em=c.length>1||c.charCodeAt(0)>200;e.textContent=c;e.style.cssText=`left:${Math.random()*92}%;animation-duration:${18+Math.random()*18}s;animation-delay:-${Math.random()*34}s;font-size:${em?18+Math.random()*14:14+Math.random()*14}px;opacity:${em?.3:.14}`;drift.append(e)});
+  $("music-btn").addEventListener("click",()=>{state.music=!state.music;save();state.music?startMusic():stopMusic();refresh()});
+  ["pointerdown","keydown"].forEach(ev=>document.addEventListener(ev,()=>startMusic()));
+  document.addEventListener("visibilitychange",()=>{if(!audioContext)return;document.hidden?audioContext.suspend():audioContext.resume()});
+  buildMap();
+  $("chargrid").addEventListener("click",e=>{const b=e.target.closest(".charbtn");if(!b)return;wChar=b.dataset.char;$("chargrid").querySelectorAll(".charbtn").forEach(x=>{const on=x===b;x.classList.toggle("sel",on);x.setAttribute("aria-checked",String(on))});wUpdate()});
+  $("welcome-name").addEventListener("input",wUpdate);
+  $("welcome-name").addEventListener("keydown",e=>{if(e.key==="Enter")welcomeDone()});
+  $("welcome-ok").addEventListener("click",welcomeDone);
+  $("welcome-cancel").addEventListener("click",closeWelcome);
+  $("rules-skip").addEventListener("click",closeRules);
+  $("brief-ok").addEventListener("click",closeBrief);
+  $("brief-back").addEventListener("click",()=>{closeBrief();show("map")});
+  document.addEventListener("click",e=>{const b=e.target.closest("button");if(b&&!b.disabled&&!(b._dragAt&&performance.now()-b._dragAt<350))sound("tap")},true);
+  if(!state.name)setTimeout(()=>openWelcome(),250);else if(!state.seenRules)setTimeout(openRules,350);
+  refresh();
+})();
+</script>
+</body>
+</html>
